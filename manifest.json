@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "Quick Search AI",
+  "version": "1.0.0",
+  "description": "Select text and search with AI assistants",
+  "permissions": [
+    "contextMenus",
+    "scripting",
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://chat.deepseek.com/*",
+    "https://tongyi.aliyun.com/*",
+    "https://chatgpt.com/*",
+    "https://grok.com/*",
+    "https://gemini.google.com/*",
+    "https://www.perplexity.ai/*",
+    "https://copilot.microsoft.com/*",
+    "https://yiyan.baidu.com/*",
+    "https://kimi.moonshot.cn/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chat.deepseek.com/*",
+        "https://tongyi.aliyun.com/qianwen/*",
+        "https://chatgpt.com/*",
+        "https://grok.com/*",
+        "https://gemini.google.com/*",
+        "https://www.perplexity.ai/*",
+        "https://copilot.microsoft.com/*",
+        "https://yiyan.baidu.com/*",
+        "https://kimi.moonshot.cn/*"
+      ],
+      "js": ["content.js"]
+    }
+  ]
+} 
