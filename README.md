@@ -44,6 +44,12 @@ A browser extension that allows you to quickly send selected text to various AI 
 
 ## Version History
 
+### v1.0.1
+- Implement the plug-in UI
+- Support AI assistant disable, edit, delete functions
+- Added query mode. You can add, delete and modify the query mode. The default query mode is provided
+- New feedback and donation mechanism
+
 ### v1.0.0
 - Initial release
 - Support for 9 mainstream AI assistants

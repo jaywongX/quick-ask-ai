@@ -1,13 +1,16 @@
 {
   "manifest_version": 3,
   "name": "Quick Search AI",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Select text and search with AI assistants",
+  "action": {
+    "default_popup": "popup.html"
+  },
   "permissions": [
-    "contextMenus",
-    "scripting",
     "activeTab",
-    "storage"
+    "storage",
+    "scripting",
+    "contextMenus"
   ],
   "host_permissions": [
     "https://chat.deepseek.com/*",
@@ -21,7 +24,8 @@
     "https://kimi.moonshot.cn/*"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "content_scripts": [
     {
@@ -36,7 +40,8 @@
         "https://yiyan.baidu.com/*",
         "https://kimi.moonshot.cn/*"
       ],
-      "js": ["content.js"]
+      "js": ["content.js"],
+      "run_at": "document_start"
     }
   ]
 } 

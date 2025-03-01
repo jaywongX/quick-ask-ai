@@ -1,0 +1,695 @@
+:root {
+  --primary-color: #615CED;
+  --text-color: #2C2C36;
+  --border-color: #E0E2EB;
+  --bg-color: #FFFFFF;
+  --disabled-color: #C8CAD9;
+}
+
+body {
+  width: 400px;
+  margin: 0;
+  padding: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  color: var(--text-color);
+  background: var(--bg-color);
+}
+
+.container {
+  background: var(--bg-color);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 12px;
+}
+
+.header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+  position: relative;
+}
+
+h1 {
+  font-size: 18px;
+  margin: 0;
+  text-align: center;
+}
+
+.action-buttons {
+  position: absolute;
+  display: flex;
+  gap: 8px;
+}
+
+.action-buttons.left {
+  left: 0;
+}
+
+.action-buttons.right {
+  right: 0;
+}
+
+.icon-btn {
+  padding: 6px;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-color);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-btn:hover {
+  background: #f5f5f5;
+}
+
+.icon-btn.primary {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+}
+
+.icon-btn.primary:hover {
+  background: var(--primary-color);
+  opacity: 0.9;
+}
+
+.settings-section {
+  margin-bottom: 24px;
+}
+
+.select-dropdown {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  margin-top: 8px;
+}
+
+.ai-list-container {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+}
+
+h2 {
+  font-size: 16px;
+  margin: 0 0 16px 0;
+}
+
+.ai-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ai-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  cursor: move;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  user-select: none;
+}
+
+.ai-drag {
+  cursor: move;
+  padding: 0 8px;
+  color: var(--disabled-color);
+  display: flex;
+  align-items: center;
+}
+
+.ai-name {
+  flex-grow: 1;
+  margin-left: 8px;
+}
+
+.ai-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.toggle-btn {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.toggle-btn.enabled {
+  background: var(--primary-color);
+  color: white;
+}
+
+.toggle-btn.disabled {
+  background: #fafafa;
+  color: var(--disabled-color);
+  border-color: var(--border-color);
+}
+
+.action-btn {
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-color);
+  opacity: 0.6;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  opacity: 1;
+  background: var(--border-color);
+}
+
+/* 拖拽相关样式 */
+.ai-item.dragging {
+  opacity: 0.5;
+  background: var(--bg-color);
+  border: 2px dashed var(--border-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ai-item.drag-over {
+  position: relative;
+}
+
+.ai-item.drag-over::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--primary-color);
+  border-radius: 2px;
+}
+
+body.dragging {
+  cursor: move;
+}
+
+/* 拖拽时的占位符样式 */
+.ai-item.dragging::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--primary-color);
+  display: none;
+}
+
+.ai-item.drag-over::after {
+  display: block;
+}
+
+/* 对话框样式 */
+.dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.dialog.hidden {
+  display: none;
+}
+
+.dialog-content {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  width: 80%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog-content h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+}
+
+.dialog-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+/* 链接样式 */
+.link-button {
+  color: var(--primary-color);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.link-button:hover {
+  text-decoration: underline;
+}
+
+/* Toast提示样式 */
+.toast {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  background: #323232;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 4px;
+  font-size: 14px;
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 1001;
+}
+
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.toast.error {
+  background: #d32f2f;
+}
+
+.toast.success {
+  background: #2e7d32;
+}
+
+/* 按钮基础样式 */
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-color);
+  color: var(--text-color);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.btn:hover {
+  background: #f5f5f5;
+}
+
+.btn.primary {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+}
+
+.btn.primary:hover {
+  opacity: 0.9;
+}
+
+/* 编辑表单样式 */
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 8px;
+  height: 100%;
+}
+
+/* 基本信息区域 */
+.basic-info {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* 询问模式区域 */
+.features-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 询问模式列表容器 */
+.features-list-container {
+  flex: 1;
+  margin: 8px 0;
+  min-height: 100px;
+  max-height: 200px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-group label {
+  font-size: 14px;
+  color: var(--text-color);
+}
+
+.form-group input {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.form-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 24px;
+  position: sticky;
+  bottom: 0;
+  background: white;
+  padding-top: 8px;
+  z-index: 1;
+  border-top: 1px solid var(--border-color);
+}
+
+/* 错误提示 */
+.form-group .error {
+  color: #d32f2f;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.form-group input.error {
+  border-color: #d32f2f;
+}
+
+/* 捐赠选项样式 */
+.donate-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.donate-btn {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  text-decoration: none;
+  color: var(--text-color);
+  transition: all 0.2s;
+}
+
+.donate-btn:hover {
+  background: #f5f5f5;
+  border-color: var(--primary-color);
+}
+
+.donate-btn span {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.donate-btn small {
+  font-size: 12px;
+  color: var(--disabled-color);
+}
+
+/* 输入错误样式 */
+.form-group input.error {
+  border-color: #d32f2f;
+}
+
+.error-message {
+  color: #d32f2f;
+  font-size: 12px;
+  margin-top: 4px;
+  z-index: 1001;
+}
+
+/* 选择器输入框和检测按钮布局 */
+.input-with-button {
+  display: flex;
+  gap: 8px;
+}
+
+.input-with-button input {
+  flex: 1;
+}
+
+.detect-btn {
+  padding: 8px 12px;
+  font-size: 14px;
+  white-space: nowrap;
+  min-width: 80px;
+}
+
+/* 检测中状态 */
+.detect-btn.detecting {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+/* 添加暗色主题支持 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #1a1a1a;
+    --text-color: #ffffff;
+    --border-color: #333333;
+    --disabled-color: #666666;
+  }
+
+  .ai-item {
+    background: #2a2a2a;
+  }
+
+  .ai-list-container {
+    background: #222222;
+  }
+
+  .dialog-content {
+    background: #2a2a2a;
+  }
+
+  .icon-btn:hover:not(.primary) {
+    background: #333333;
+  }
+
+  .toggle-btn.disabled {
+    background: #2a2a2a;
+  }
+
+  .btn:hover:not(.primary) {
+    background: #333333;
+  }
+
+  .form-group input {
+    background: #2a2a2a;
+    color: white;
+    border-color: #333333;
+  }
+
+  .form-group input:focus {
+    border-color: var(--primary-color);
+  }
+}
+
+/* 询问模式列表样式 */
+.features-container {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.features-container select {
+  flex: 1;
+}
+
+#featuresList {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.feature-item {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: move;
+}
+
+.feature-item:last-child {
+  border-bottom: none;
+}
+
+.feature-drag {
+  color: var(--disabled-color);
+  cursor: move;
+  padding-top: 2px;
+}
+
+.feature-item.dragging {
+  opacity: 0.5;
+  background: var(--bg-color);
+  border: 2px dashed var(--border-color);
+}
+
+.feature-radio {
+  padding-top: 2px;
+}
+
+.feature-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.feature-name {
+  font-weight: bold;
+}
+
+.feature-prompt {
+  font-size: 0.9em;
+  color: #666;
+}
+
+.feature-actions {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+/* 自定义滚动条样式 */
+#featuresList::-webkit-scrollbar {
+  width: 8px;
+}
+
+#featuresList::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+#featuresList::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+#featuresList::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* 询问模式编辑表单样式 */
+#featurePrompt {
+  min-height: 120px;
+  font-family: monospace;
+  line-height: 1.4;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+}
+
+#featurePrompt:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+/* 隐藏元素 */
+.hidden {
+  display: none !important;
+}
+
+/* 自定义对话框滚动条样式 */
+.dialog-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dialog-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.dialog-content::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.dialog-content::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* 编辑表单容器 */
+.edit-form-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  /* overflow-y: auto; */
+}
+
+/* 编辑对话框特殊样式 */
+#editDialog .dialog-content {
+  height: 520px;  /* 只给编辑对话框设置固定高度 */
+}
+
+/* 删除对话框特殊样式 */
+#deleteDialog .dialog-content,
+#deleteFeatureDialog .dialog-content,
+#resetDialog .dialog-content {
+  width: 300px;  /* 稍微窄一点 */
+  padding: 20px;  /* 减小内边距 */
+}
+
+/* 删除对话框的文本样式 */
+#deleteDialog p,
+#deleteFeatureDialog p,
+#resetDialog p {
+  margin: 0 0 20px 0;  /* 调整段落间距 */
+  line-height: 1.5;
+}
+
+/* 确认对话框显示在编辑对话框之上 */
+#deleteFeatureDialog {
+  z-index: 1001;
+}
+
+#deleteFeatureDialog .dialog-content {
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+} 

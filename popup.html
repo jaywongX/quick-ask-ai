@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="action-buttons left">
+        <button id="resetBtn" class="icon-btn" title="Reset all settings">↺</button>
+        <button id="feedbackBtn" class="icon-btn" title="Send feedback">💬</button>
+      </div>
+      <h1>Quick Search AI</h1>
+      <div class="action-buttons right">
+        <button id="donateBtn" class="icon-btn primary" title="Support this project">❤️</button>
+      </div>
+    </div>
+
+    <div class="ai-list-container">
+      <div id="aiList" class="ai-list">
+        <!-- AI items will be populated by JavaScript -->
+      </div>
+    </div>
+
+    <!-- 重置确认对话框 -->
+    <div id="resetDialog" class="dialog hidden">
+      <div class="dialog-content">
+        <h3>Reset Settings</h3>
+        <p>Are you sure you want to reset all settings to default?</p>
+        <div class="dialog-buttons">
+          <button id="resetCancel" class="btn">Cancel</button>
+          <button id="resetConfirm" class="btn primary">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 在现有对话框后添加 -->
+    <div id="editDialog" class="dialog hidden">
+      <div class="dialog-content">
+        <h3>Edit AI Assistant</h3>
+        <div class="edit-form-container">
+          <form id="editForm" class="edit-form">
+            <div class="basic-info">
+              <div class="form-group">
+                <label for="editName">Name</label>
+                <input type="text" id="editName" required>
+              </div>
+              <div class="form-group">
+                <label for="editUrl">URL</label>
+                <input type="url" id="editUrl" required>
+              </div>
+            </div>
+            <div class="features-section">
+              <div class="form-group">
+                <label>Ask Modes</label>
+                <div class="features-container">
+                  <button type="button" class="btn" id="addFeatureBtn">+ Add Mode</button>
+                </div>
+                <div class="features-list-container">
+                  <div id="featuresList">
+                    <!-- Features will be populated by JavaScript -->
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- 暂时隐藏的选择器配置 -->
+            <div class="form-group hidden">
+              <label for="editTextAreaSelector">Text Area Selector</label>
+              <div class="input-with-button">
+                <input type="text" id="editTextAreaSelector" required>
+                <button type="button" class="btn detect-btn" data-detect="textArea">
+                  🔍 Detect
+                </button>
+              </div>
+            </div>
+            <div class="form-group hidden">
+              <label for="editSubmitSelector">Submit Button Selector</label>
+              <div class="input-with-button">
+                <input type="text" id="editSubmitSelector" required>
+                <button type="button" class="btn detect-btn" data-detect="submitButton">
+                  🔍 Detect
+                </button>
+              </div>
+            </div>
+            <div class="form-buttons">
+              <button type="button" id="editCancel" class="btn">Cancel</button>
+              <button type="submit" id="editSave" class="btn primary">Save</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- 捐赠对话框 -->
+    <div id="donateDialog" class="dialog hidden">
+      <div class="dialog-content">
+        <h3>Support this project</h3>
+        <div class="donate-options">
+          <a href="https://ko-fi.com/jaywong" target="_blank" class="donate-btn">
+            <span>Ko-fi</span>
+            <small>Support via Ko-fi (Overseas)</small>
+          </a>
+          <a href="https://afdian.com/a/jaywong" target="_blank" class="donate-btn">
+            <span>爱发电</span>
+            <small>通过爱发电支持 (中国大陆)</small>
+          </a>
+        </div>
+        <div class="dialog-buttons">
+          <button id="donateClose" class="btn">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 在其他对话框后添加 -->
+    <div id="deleteDialog" class="dialog hidden">
+      <div class="dialog-content">
+        <h3>Delete AI Assistant</h3>
+        <p>Are you sure you want to delete <span id="deleteAssistantName"></span>?</p>
+        <div class="dialog-buttons">
+          <button id="deleteCancel" class="btn">Cancel</button>
+          <button id="deleteConfirm" class="btn primary">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 新增/编辑询问模式的对话框 -->
+    <div id="featureDialog" class="dialog hidden">
+      <div class="dialog-content">
+        <h3>Edit Ask Mode</h3>
+        <form id="featureForm">
+          <div class="form-group">
+            <label for="featureName">Mode Name</label>
+            <input type="text" id="featureName" required>
+          </div>
+          <div class="form-group">
+            <label for="featurePrompt">Prompt Template</label>
+            <textarea id="featurePrompt" required rows="3"></textarea>
+            <small>Use ${text} to represent the selected text</small>
+          </div>
+          <div class="form-buttons">
+            <button type="button" class="btn" id="featureCancel">Cancel</button>
+            <button type="submit" class="btn primary">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 在其他对话框后添加 -->
+    <div id="deleteFeatureDialog" class="dialog hidden">
+      <div class="dialog-content">
+        <h3>Delete Ask Mode</h3>
+        <p>Are you sure you want to delete <span id="deleteFeatureName"></span>?</p>
+        <div class="dialog-buttons">
+          <button id="deleteFeatureCancel" class="btn">Cancel</button>
+          <button id="deleteFeatureConfirm" class="btn primary">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="popup.js" type="module"></script>
+</body>
+</html> 
