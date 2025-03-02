@@ -338,13 +338,61 @@ body.dragging {
   flex-direction: column;
   gap: 12px;
   padding-bottom: 8px;
-  height: 100%;
+}
+
+/* 输入行布局 */
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.form-label {
+  min-width: 80px;
+  text-align: left;
+  font-size: 14px;
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+.input-row input {
+  flex: 1;
 }
 
 /* 基本信息区域 */
 .basic-info {
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 功能设置区域 */
+.capabilities-section {
+  margin: 0;
+  padding: 0;
+}
+
+.capabilities-list {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1;
+}
+
+/* 功能按钮样式 */
+.capability-toggle {
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-color);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  white-space: nowrap;
+  min-width: 40px;
+  max-width: fit-content;
 }
 
 /* 询问模式区域 */
@@ -352,6 +400,8 @@ body.dragging {
   flex: 1;
   display: flex;
   flex-direction: column;
+  margin: 0;
+  padding: 0;
 }
 
 /* 询问模式列表容器 */
@@ -365,12 +415,13 @@ body.dragging {
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
 
 .form-group label {
   font-size: 14px;
   color: var(--text-color);
+  font-weight: 500;
 }
 
 .form-group input {
@@ -527,9 +578,9 @@ body.dragging {
 
 /* 询问模式列表样式 */
 .features-container {
+  flex: 1;
   display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
+  justify-content: flex-start;
 }
 
 .features-container select {
@@ -537,18 +588,19 @@ body.dragging {
 }
 
 #featuresList {
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
-  max-height: 250px;
+  max-height: 200px;
   overflow-y: auto;
 }
 
 .feature-item {
   padding: 12px;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: flex-start;
   gap: 12px;
+  background: var(--bg-color);
   cursor: move;
 }
 
@@ -692,4 +744,46 @@ body.dragging {
 #deleteFeatureDialog .dialog-content {
   background: white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* 功能设置面板 */
+.capabilities-panel {
+  margin-top: 10px;
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  color: #666;
+}
+
+.capability-item {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.capability-name {
+  flex: 1;
+  font-size: 14px;
+}
+
+.capability-toggle.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.capability-toggle:hover {
+  opacity: 0.9;
+}
+
+/* 添加模式按钮样式 */
+#addFeatureBtn {
+  margin-left: 0;  /* 确保没有左边距 */
 } 

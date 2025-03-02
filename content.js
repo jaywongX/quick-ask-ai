@@ -50,7 +50,7 @@ const AI_CONFIGS = {
     inputMethod: 'execCommand',
     submitMethod: 'multiClick',
     submitCheck: 'class'
-  },
+  }
   // ... 其他 AI 助手的配置
 };
 
@@ -239,6 +239,84 @@ class AIHandler {
       throw error;
     }
   }
+
+  // 处理功能状态
+  async handleCapabilities() {
+    const assistant = await getAssistantConfig(this.aiId);
+    if (!assistant?.capabilities) return;
+    
+    const promises = [];
+    
+    Object.entries(assistant.capabilities).forEach(([capId, capability]) => {
+      if (!capability.selector) return;
+      
+      const buttonText = capability.text;
+      
+      const promise = new Promise(resolve => {
+        waitForElement(capability.selector, buttonText, (element) => {
+          const isActive = this.checkButtonState(element, this.aiId);
+          
+          if (isActive !== capability.enabled) {
+            element.click();
+            console.log(`[Quick Search AI] ${this.aiId} clicked button: `, element);
+          }
+          resolve();
+        }, 10000, this.aiId);
+      });
+      
+      promises.push(promise);
+    });
+    
+    // 等待所有功能按钮处理完成
+    await Promise.all(promises);
+  }
+
+  // 检查按钮状态的方法
+  checkButtonState(element, aiId) {
+    switch (aiId) {
+      case 'chatgpt':
+        return this.checkChatGPTState(element);
+      case 'deepseek':
+        return this.checkDeepSeekState(element);
+      case 'perplexity':
+        return this.checkPerplexityState(element);
+      case 'qianwen':
+        return this.checkQianwenState(element);
+      case 'kimi':
+        return this.checkKimiState(element);
+      default:
+        return this.checkDefaultState(element);
+    }
+  }
+
+  // 各个 AI 助手的状态检查方法
+  checkChatGPTState(element) {
+    return element.getAttribute('aria-pressed') === 'true';
+  }
+  
+  checkDeepSeekState(element) {
+    const style = window.getComputedStyle(element);
+    return style.backgroundColor !== 'rgb(255, 255, 255)';
+  }
+  
+  checkPerplexityState(element) {
+    // 找到按钮的开关元素
+    const switchButton = element.querySelector('button[role="switch"]');
+    return switchButton?.getAttribute('data-state') === 'checked';
+  }
+  
+  checkQianwenState(element) {
+    return element.classList.contains('active');
+  }
+  
+  checkKimiState(element) {
+    return element.classList.contains('open');
+  }
+  
+  checkDefaultState(element) {
+    return element.classList.contains('active') || 
+           element.getAttribute('aria-pressed') === 'true';
+  }
 }
 
 // 主函数
@@ -252,7 +330,7 @@ async function init() {
         detectSelector(request.type).then(selector => {
           sendResponse({ selector });
         });
-        return true; // 保持消息通道开启
+        return true;
       }
     });
 
@@ -260,15 +338,36 @@ async function init() {
     if (document.readyState !== 'complete') {
       await new Promise(resolve => window.addEventListener('load', resolve));
     }
+    
+    // 处理功能状态
+    let handler;
+    let capabilitiesPromise;
+    {
+      const currentUrl = window.location.href;
+      const data = await chrome.storage.sync.get('aiAssistants');
+      
+      const assistant = Object.values(data.aiAssistants.assistants).find(
+        a => currentUrl.startsWith(a.url)
+      );
+      
+      if (assistant) {
+        handler = new AIHandler(assistant.id);
+        capabilitiesPromise = handler.handleCapabilities();
+      }
+    }
 
     // 检查是否有待处理的查询操作
     const data = await chrome.storage.local.get(['selectedText', 'aiProvider']);
     if (data.selectedText && data.aiProvider) {
-      // 清除存储的数据
+      // 等待功能状态处理完成
+      await capabilitiesPromise;
+      
       await chrome.storage.local.remove(['selectedText', 'aiProvider']);
 
-      // 使用通用 Handler 处理查询
-      const handler = new AIHandler(data.aiProvider);
+      if (!handler || handler.aiId !== data.aiProvider) {
+        handler = new AIHandler(data.aiProvider);
+      }
+      
       const textArea = await handler.handleTextInput(data.selectedText);
       await handler.handleSubmit(textArea);
     }
@@ -287,9 +386,6 @@ async function detectSelector(type) {
     const overlay = createOverlay();
     const hint = showDetectHint(type);
 
-    // 等待页面加载完成
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
     return new Promise((resolve) => {
       const clickHandler = (e) => {
         e.preventDefault();
@@ -619,4 +715,38 @@ async function handleSelectedText(text) {
       submitButton.click();
     }
   }
-} 
+}
+
+// 等待功能按钮出现的辅助函数
+function waitForElement(selector, buttonText, callback, timeout = 10000, aiId) {
+  const startTime = Date.now();
+  let observer;
+  let found = false;
+  
+  function check() {
+    if (found) return;
+    const elements = document.querySelectorAll(selector);
+    const element = Array.from(elements).find(el => el.textContent.includes(buttonText));
+    
+    if (element) {
+      found = true;
+      callback(element);
+      observer?.disconnect();
+      return;
+    }
+  
+    if (Date.now() - startTime >= timeout) {
+      console.warn(`[Quick Search AI] Button not found: ${buttonText}`);
+      observer?.disconnect();
+      return;
+    }
+  }
+  
+  check();
+  
+  observer = new MutationObserver(check);
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+}

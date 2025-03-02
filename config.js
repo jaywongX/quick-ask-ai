@@ -28,7 +28,7 @@ export const DEFAULT_ASSISTANTS = {
     chatgpt: {
       id: 'chatgpt',
       name: 'ChatGPT',
-      url: 'https://chat.openai.com/',
+      url: 'https://chatgpt.com/',
       enabled: true,
       order: 0,
       currentFeature: 'ask',
@@ -38,6 +38,14 @@ export const DEFAULT_ASSISTANTS = {
       selectors: {
         textArea: '#prompt-textarea',
         submitButton: 'button[data-testid="send-button"]'
+      },
+      capabilities: {
+        reason: {
+          name: 'Reason',
+          text: 'Reason',
+          enabled: false,
+          selector: 'button[aria-label="Reason"]'
+        }
       }
     },
     deepseek: {
@@ -53,6 +61,20 @@ export const DEFAULT_ASSISTANTS = {
       selectors: {
         textArea: 'textarea[placeholder]',
         submitButton: 'div[role="button"][aria-disabled]'
+      },
+      capabilities: {
+        deepThink: {
+          name: 'DeepThink',
+          text: 'DeepThink (R1)',
+          enabled: false,
+          selector: 'div[role="button"]'
+        },
+        search: {
+          name: 'Search',
+          text: 'Search',
+          enabled: false,
+          selector: 'div[role="button"]'
+        }
       }
     },
     gemini: {
@@ -85,27 +107,12 @@ export const DEFAULT_ASSISTANTS = {
         submitButton: 'button[aria-label*="Submit"]'
       }
     },
-    qianwen: {
-      id: 'qianwen',
-      name: 'Qianwen',
-      url: 'https://tongyi.aliyun.com/qianwen/',
-      enabled: true,
-      order: 4,
-      currentFeature: 'ask',
-      features: FEATURE_TEMPLATES,  // 每个助手独立的模板配置
-      menuId: 'searchWithQianwen',
-      menuTitle: 'Search with Qianwen',
-      selectors: {
-        textArea: '.ant-input',
-        submitButton: 'div[class*="operateBtn"]'
-      }
-    },
     grok: {
       id: 'grok',
       name: 'Grok',
       url: 'https://grok.com/',
       enabled: true,
-      order: 5,
+      order: 4,
       currentFeature: 'ask',
       features: FEATURE_TEMPLATES,  // 每个助手独立的模板配置
       menuId: 'searchWithGrok',
@@ -120,7 +127,7 @@ export const DEFAULT_ASSISTANTS = {
       name: 'Microsoft Copilot',
       url: 'https://copilot.microsoft.com/',
       enabled: true,
-      order: 6,
+      order: 5,
       currentFeature: 'ask',
       features: FEATURE_TEMPLATES,  // 每个助手独立的模板配置
       menuId: 'searchWithCopilot',
@@ -130,19 +137,19 @@ export const DEFAULT_ASSISTANTS = {
         submitButton: 'button[aria-label*="Submit"]'
       }
     },
-    yiyan: {
-      id: 'yiyan',
-      name: 'Wenxin Yiyan',
-      url: 'https://yiyan.baidu.com/',
+    qianwen: {
+      id: 'qianwen',
+      name: 'Qianwen',
+      url: 'https://tongyi.aliyun.com/qianwen/',
       enabled: true,
-      order: 7,
+      order: 6,
       currentFeature: 'ask',
       features: FEATURE_TEMPLATES,  // 每个助手独立的模板配置
-      menuId: 'searchWithYiyan',
-      menuTitle: 'Search with Wenxin Yiyan',
+      menuId: 'searchWithQianwen',
+      menuTitle: 'Search with Qianwen',
       selectors: {
-        textArea: '.yc-editor[contenteditable="true"]',
-        submitButton: '#sendBtn'
+        textArea: '.ant-input',
+        submitButton: 'div[class*="operateBtn"]'
       }
     },
     kimi: {
@@ -150,7 +157,7 @@ export const DEFAULT_ASSISTANTS = {
       name: 'Kimi',
       url: 'https://kimi.moonshot.cn/',
       enabled: true,
-      order: 8,
+      order: 7,
       currentFeature: 'ask',
       features: FEATURE_TEMPLATES,  // 每个助手独立的模板配置
       menuId: 'searchWithKimi',
@@ -158,6 +165,35 @@ export const DEFAULT_ASSISTANTS = {
       selectors: {
         textArea: '.chat-input-editor[data-lexical-editor="true"]',
         submitButton: '.send-button'
+      },
+      capabilities: {
+        thinking: {
+          name: 'Thinking',
+          text: 'Thinking',
+          enabled: false,
+          selector: '.k15-switch'
+        },
+        search: {
+          name: 'Internet Search',
+          text: 'Internet Search',
+          enabled: false,
+          selector: '.search-switch'
+        }
+      }
+    },
+    yiyan: {
+      id: 'yiyan',
+      name: 'Wenxin Yiyan',
+      url: 'https://yiyan.baidu.com/',
+      enabled: true,
+      order: 8,
+      currentFeature: 'ask',
+      features: FEATURE_TEMPLATES,  // 每个助手独立的模板配置
+      menuId: 'searchWithYiyan',
+      menuTitle: 'Search with Wenxin Yiyan',
+      selectors: {
+        textArea: '.yc-editor[contenteditable="true"]',
+        submitButton: '#sendBtn'
       }
     }
   }

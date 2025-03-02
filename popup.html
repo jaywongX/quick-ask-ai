@@ -43,19 +43,35 @@
           <form id="editForm" class="edit-form">
             <div class="basic-info">
               <div class="form-group">
-                <label for="editName">Name</label>
-                <input type="text" id="editName" required>
+                <div class="input-row">
+                  <label class="form-label" for="editName">Name</label>
+                  <input type="text" id="editName" required>
+                </div>
               </div>
               <div class="form-group">
-                <label for="editUrl">URL</label>
-                <input type="url" id="editUrl" required>
+                <div class="input-row">
+                  <label class="form-label" for="editUrl">URL</label>
+                  <input type="url" id="editUrl" required>
+                </div>
+              </div>
+            </div>
+            <div class="capabilities-section">
+              <div class="form-group">
+                <div class="input-row">
+                  <label class="form-label">Capabilities</label>
+                  <div id="editCapabilitiesList" class="capabilities-list">
+                    <!-- Capabilities will be populated by JavaScript -->
+                  </div>
+                </div>
               </div>
             </div>
             <div class="features-section">
               <div class="form-group">
-                <label>Ask Modes</label>
-                <div class="features-container">
-                  <button type="button" class="btn" id="addFeatureBtn">+ Add Mode</button>
+                <div class="input-row">
+                  <label class="form-label">Ask Modes</label>
+                  <div class="features-container">
+                    <button type="button" class="btn" id="addFeatureBtn">+ Add Mode</button>
+                  </div>
                 </div>
                 <div class="features-list-container">
                   <div id="featuresList">
@@ -68,7 +84,7 @@
             <div class="form-group hidden">
               <label for="editTextAreaSelector">Text Area Selector</label>
               <div class="input-with-button">
-                <input type="text" id="editTextAreaSelector" required>
+                <input type="text" id="editTextAreaSelector">
                 <button type="button" class="btn detect-btn" data-detect="textArea">
                   🔍 Detect
                 </button>
@@ -77,7 +93,7 @@
             <div class="form-group hidden">
               <label for="editSubmitSelector">Submit Button Selector</label>
               <div class="input-with-button">
-                <input type="text" id="editSubmitSelector" required>
+                <input type="text" id="editSubmitSelector">
                 <button type="button" class="btn detect-btn" data-detect="submitButton">
                   🔍 Detect
                 </button>
@@ -155,6 +171,26 @@
           <button id="deleteFeatureCancel" class="btn">Cancel</button>
           <button id="deleteFeatureConfirm" class="btn primary">Delete</button>
         </div>
+      </div>
+    </div>
+
+    <div class="assistant-item">
+      <!-- 现有的助手配置 -->
+      <div class="assistant-header">
+        <span class="assistant-name"></span>
+        <label class="switch">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <!-- 添加功能设置面板 -->
+      <div class="capabilities-panel">
+        <div class="capabilities-list">
+          <!-- 动态插入功能项 -->
+        </div>
+      </div>
+      <!-- 现有的特性设置面板 -->
+      <div class="features-panel">
+        <!-- ... -->
       </div>
     </div>
   </div>

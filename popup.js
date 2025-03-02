@@ -267,7 +267,7 @@ function setupEventListeners() {
   // 编辑表单提交
   document.getElementById('editForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    await handleEditFormSubmit();
+    await handleEditFormSubmit(e);
   });
 
   // 编辑取消
@@ -395,6 +395,17 @@ function setupEventListeners() {
   document.getElementById('deleteFeatureCancel').addEventListener('click', () => {
     hideDeleteFeatureDialog();
   });
+
+  // 添加功能切换事件监听
+  document.getElementById('editCapabilitiesList').addEventListener('click', e => {
+    const toggle = e.target.closest('.capability-toggle');
+    if (!toggle) return;
+    
+    e.preventDefault();  // 防止表单提交
+    e.stopPropagation(); // 防止事件冒泡
+    
+    toggle.classList.toggle('active');
+  });
 }
 
 // 初始化拖拽排序
@@ -501,26 +512,37 @@ async function getAssistantConfig(id) {
   return data.assistants[id];
 }
 
-// 更新showEditDialog函数
+// 显示编辑对话框
 async function showEditDialog(id) {
   currentEditId = id;
   const data = await loadAssistantsData();
   const assistant = data.assistants[id];
-
-  // 填充表单
-  document.getElementById('editName').value = assistant.name;
   
+  document.getElementById('editName').value = assistant.name;
+  document.getElementById('editUrl').value = assistant.url;
+  
+  // 渲染功能设置列表
+  const capabilitiesList = document.getElementById('editCapabilitiesList');
+  capabilitiesList.innerHTML = '';
+  
+  if (assistant.capabilities) {
+    Object.entries(assistant.capabilities).forEach(([capId, capability]) => {
+      const button = document.createElement('button');
+      button.className = `capability-toggle ${capability.enabled ? 'active' : ''}`;
+      button.dataset.capability = capId;
+      button.textContent = capability.name;
+      capabilitiesList.appendChild(button);
+    });
+  }
+  
+  // 渲染询问模式列表
   await renderFeaturesList();
   
-  document.getElementById('editUrl').value = assistant.url;
-  document.getElementById('editTextAreaSelector').value = assistant.selectors.textArea;
-  document.getElementById('editSubmitSelector').value = assistant.selectors.submitButton;
-
   DialogManager.showDialog('editDialog');
 }
 
 function hideEditDialog() {
-  DialogManager.hideAllDialogs();
+  DialogManager.hideDialog('editDialog');
   currentEditId = null;
 }
 
@@ -556,71 +578,34 @@ function validateForm() {
   return true;
 }
 
-// 更新表单提交处理
-async function handleEditFormSubmit() {
+// 处理编辑表单提交
+async function handleEditFormSubmit(e) {
+  e.preventDefault();
+  
   try {
-    if (!validateForm()) {
-      return;
-    }
-  
-    // 获取表单数据
-    const name = document.getElementById('editName').value.trim();
-    const url = document.getElementById('editUrl').value.trim();
-    const textAreaSelector = document.getElementById('editTextAreaSelector').value.trim();
-    const submitSelector = document.getElementById('editSubmitSelector').value.trim();
-  
-    // 获取当前助手配置
     const data = await loadAssistantsData();
     const assistant = data.assistants[currentEditId];
     
-    // 检查 URL 是否发生变化
-    if (url !== assistant.url) {
-      // 显示加载状态
-      const saveButton = document.querySelector('#editForm button[type="submit"]');
-      const originalText = saveButton.textContent;
-      saveButton.textContent = 'Checking URL...';
-      saveButton.disabled = true;
+    // 更新基本信息
+    assistant.name = document.getElementById('editName').value.trim();
+    assistant.url = document.getElementById('editUrl').value.trim();
+    
+    // 更新功能设置
+    if (assistant.capabilities) {
+      const capabilityToggles = document.querySelectorAll('#editCapabilitiesList .capability-toggle');
       
-      try {
-        // 检查URL可访问性
-        const result = await chrome.runtime.sendMessage({ 
-          action: 'checkUrl', 
-          url: url 
-        });
-        
-        if (!result.isAccessible) {
-          showToast(result.error || 'URL is not accessible', 'error');
-          return;
-        }
-      } finally {
-        // 恢复按钮状态
-        saveButton.textContent = originalText;
-        saveButton.disabled = false;
-      }
+      capabilityToggles.forEach(toggle => {
+        const capId = toggle.dataset.capability;
+        assistant.capabilities[capId].enabled = toggle.classList.contains('active');
+      });
     }
-  
-    // 更新助手配置
-    assistant.name = name;
-    assistant.url = url;
-    assistant.selectors = {
-      textArea: textAreaSelector,
-      submitButton: submitSelector
-    };
-    assistant.menuTitle = `Search with ${name}`;
-  
-    // 保存更新
+    
     await saveAssistantsData(data);
-  
-    // 更新UI
-    renderAIList(data.assistants);
     await updateContextMenus();
-  
-    // 关闭对话框
-    hideEditDialog();
-  
-    // 显示成功提示
+    renderAIList(data.assistants);
+    
+    DialogManager.hideDialog('editDialog');
     showToast('AI Assistant updated successfully');
-  
   } catch (error) {
     console.error('[Quick Search AI] Error updating assistant:', error);
     showToast('Failed to update AI Assistant', 'error');
@@ -967,4 +952,23 @@ function getDragAfterElement(container, y) {
       return closest;
     }
   }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+// 渲染助手配置
+async function renderAssistant(assistant) {
+  // ... 现有代码 ...
+  
+  // 渲染功能设置
+  const capabilitiesList = assistantElem.querySelector('.capabilities-list');
+  capabilitiesList.innerHTML = '';
+  
+  if (assistant.capabilities) {
+    Object.entries(assistant.capabilities).forEach(([capId, capability]) => {
+      const button = document.createElement('button');
+      button.className = `capability-toggle ${capability.enabled ? 'active' : ''}`;
+      button.dataset.capability = capId;
+      button.textContent = capability.name;
+      capabilitiesList.appendChild(button);
+    });
+  }
 }
