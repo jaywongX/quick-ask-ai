@@ -1,4 +1,4 @@
-import { DEFAULT_ASSISTANTS } from './config.js';
+import { DEFAULT_ASSISTANTS, DISPLAY_NAMES } from './config.js';
 
 // 在插件安装时初始化数据和菜单
 chrome.runtime.onInstalled.addListener(async ({ reason }) => {
@@ -35,15 +35,14 @@ async function createContextMenus() {
   const assistants = data.assistants;
   
   // 只为启用的AI助手创建菜单
-  Object.values(assistants)
-    .filter(assistant => assistant.enabled)
-    .sort((a, b) => a.order - b.order)
-    .forEach(assistant => {
-      // 创建AI助手子菜单
+  Object.entries(assistants)
+    .filter(([_, assistant]) => assistant.enabled)
+    .sort(([_, a], [__, b]) => a.order - b.order)
+    .forEach(([id, assistant]) => {
       chrome.contextMenus.create({
-        id: `searchWith${assistant.id}`,
+        id: `searchWith${id.charAt(0).toUpperCase()}${id.slice(1)}`,
         parentId: "quickSearchAI",
-        title: `Search with ${assistant.name}`,
+        title: `Search with ${DISPLAY_NAMES[id]}`,
         contexts: ["selection"]
       });
     });
@@ -71,28 +70,52 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   const data = await loadAssistantsData();
   const selectedText = info.selectionText;
   
-  const menuId = info.menuItemId.replace('searchWith', '');
+  const menuId = info.menuItemId.replace('searchWith', '').toLowerCase();
   const assistant = data.assistants[menuId];
   
   if (assistant && assistant.enabled) {
     let processedText = selectedText;
     
-    // 使用助手当前选择的询问模式处理文本
     if (assistant.currentFeature && assistant.features?.[assistant.currentFeature]) {
       const template = assistant.features[assistant.currentFeature].prompt;
       processedText = template.replace('${text}', selectedText);
     }
 
-    // 在新标签页中打开AI助手
-    chrome.tabs.create({
-      url: assistant.url
-    }, (newTab) => {
-      // 存储要处理的文本和AI助手ID
-      chrome.storage.local.set({ 
-        'selectedText': processedText,
-        'aiProvider': assistant.id
-      });
+    // 查找已存在的标签页
+    const existingTabs = await chrome.tabs.query({
+      url: [
+        `${assistant.url}*`,         // 匹配基础 URL 及其子路径
+        `${assistant.url.replace(/\/$/, '')}/*`  // 匹配没有尾部斜杠的 URL 及其子路径
+      ]
     });
+
+    if (existingTabs.length > 0 && assistant.tabBehavior === 'reuse') {
+      // 复用已有标签页
+      await chrome.tabs.update(existingTabs[0].id, {
+        active: true
+      });
+      
+      // 存储要处理的文本和 AI 助手 ID
+      await chrome.storage.local.set({
+        'selectedText': processedText,
+        'aiProvider': menuId
+      });
+      
+      // 通知标签页执行查询
+      await chrome.tabs.sendMessage(existingTabs[0].id, {
+        action: 'executeQuery'
+      });
+    } else {
+      // 创建新标签页
+      chrome.tabs.create({
+        url: assistant.url
+      }, (newTab) => {
+        chrome.storage.local.set({
+          'selectedText': processedText,
+          'aiProvider': menuId
+        });
+      });
+    }
   }
 });
 
@@ -100,6 +123,8 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'createContextMenus') {
     createContextMenus();
+  } else if (message.action === 'openAssistant') {
+    handleOpenAssistant(message.assistantId, message.selectedText);
   } else if (message.action === 'checkUrl') {
     // 检查URL是否可访问
     checkUrlAccessibility(message.url)
@@ -130,15 +155,87 @@ async function loadAssistantsData() {
 // 检查URL是否可访问
 async function checkUrlAccessibility(url) {
   try {
-    const response = await fetch(url, {
+    // 检查 URL 格式
+    const urlObj = new URL(url);
+    
+    // 获取基础域名
+    const baseUrl = `${urlObj.protocol}//${urlObj.hostname}`;
+    
+    const response = await fetch(baseUrl, {
       method: 'HEAD',
       mode: 'no-cors'  // 允许跨域请求
     });
+    
+    // 检查响应状态
+    if (!response.ok && response.status !== 0) {  // status 为 0 是因为 no-cors 模式
+      throw new Error('URL is not accessible');
+    }
+
     return { isAccessible: true };
   } catch (error) {
     return { 
       isAccessible: false, 
-      error: 'This URL appears to be inaccessible. Please verify the URL is correct and the service is available.'
+      error: error.message === 'URL is not accessible' 
+        ? 'This URL appears to be inaccessible. Please verify the URL is correct and the service is available.'
+        : 'Invalid URL format. Please enter a valid base URL (e.g., https://chatgpt.com).'
     };
+  }
+}
+
+// 处理打开 AI 助手
+async function handleOpenAssistant(assistantId, selectedText) {
+  try {
+    const data = await loadAssistantsData();
+    const assistant = data.assistants[assistantId];
+    
+    if (assistant && assistant.enabled) {
+      let processedText = selectedText;
+      
+      if (assistant.currentFeature && assistant.features?.[assistant.currentFeature]) {
+        const template = assistant.features[assistant.currentFeature].prompt;
+        processedText = template.replace('${text}', selectedText);
+      }
+
+      // 查找已存在的标签页
+      const existingTabs = await chrome.tabs.query({
+        url: [
+          `${assistant.url}*`,         // 匹配基础 URL 及其子路径
+          `${assistant.url.replace(/\/$/, '')}/*`  // 匹配没有尾部斜杠的 URL 及其子路径
+        ]
+      });
+
+      if (existingTabs.length > 0 && assistant.tabBehavior === 'reuse') {
+        // 复用已有标签页
+        await chrome.tabs.update(existingTabs[0].id, {
+          active: true
+        });
+        
+        // 存储要处理的文本和 AI 助手 ID
+        await chrome.storage.local.set({
+          'selectedText': processedText,
+          'aiProvider': assistantId
+        });
+        
+        // 通知标签页执行查询
+        await chrome.tabs.sendMessage(existingTabs[0].id, {
+          action: 'executeQuery'
+        });
+      } else {
+        // 创建新标签页
+        chrome.tabs.create({
+          url: assistant.url
+        }, (newTab) => {
+          chrome.storage.local.set({
+            'selectedText': processedText,
+            'aiProvider': assistantId
+          });
+        });
+      }
+      return { success: true };
+    }
+    return { success: false, error: 'Assistant not found or disabled' };
+  } catch (error) {
+    console.error('[Quick Search AI] Error:', error);
+    return { success: false, error: error.message };
   }
 }

@@ -249,7 +249,7 @@ body.dragging {
 }
 
 .dialog-content h3 {
-  margin: 0 0 16px 0;
+  margin: 0 0 10px 0;
   font-size: 18px;
 }
 
@@ -344,14 +344,11 @@ body.dragging {
 .input-row {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
 }
 
 .form-label {
   min-width: 80px;
-  text-align: left;
-  font-size: 14px;
-  color: var(--text-color);
   font-weight: 500;
 }
 
@@ -375,9 +372,8 @@ body.dragging {
 
 .capabilities-list {
   display: flex;
-  flex-direction: row;
+  gap: 8px;
   flex-wrap: wrap;
-  gap: 6px;
   flex: 1;
 }
 
@@ -395,6 +391,16 @@ body.dragging {
   max-width: fit-content;
 }
 
+.capability-toggle:hover {
+  background: #f5f5f5;
+}
+
+.capability-toggle.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
 /* 询问模式区域 */
 .features-section {
   flex: 1;
@@ -409,7 +415,7 @@ body.dragging {
   flex: 1;
   margin: 8px 0;
   min-height: 100px;
-  max-height: 200px;
+  max-height: 180px;
 }
 
 .form-group {
@@ -442,7 +448,6 @@ body.dragging {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  margin-top: 24px;
   position: sticky;
   bottom: 0;
   background: white;
@@ -717,7 +722,7 @@ body.dragging {
 
 /* 编辑对话框特殊样式 */
 #editDialog .dialog-content {
-  height: 520px;  /* 只给编辑对话框设置固定高度 */
+  height: 540px;  /* 只给编辑对话框设置固定高度 */
 }
 
 /* 删除对话框特殊样式 */
@@ -786,4 +791,92 @@ body.dragging {
 /* 添加模式按钮样式 */
 #addFeatureBtn {
   margin-left: 0;  /* 确保没有左边距 */
+}
+
+.shortcut-setting {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.shortcut-input {
+  width: 120px;
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  background: #f5f5f5;
+  cursor: pointer;
+}
+
+.shortcut-input:focus {
+  outline: none;
+  border-color: #666;
+  background: #fff;
+}
+
+.edit-shortcut {
+  padding: 4px 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #666;
+}
+
+.edit-shortcut:hover {
+  color: #333;
+}
+
+.shortcut-input-group {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+}
+
+.shortcut-input-group input {
+  flex: 1;
+  background: #f5f5f5;
+  cursor: pointer;
+}
+
+.shortcut-input-group input:focus {
+  background: #fff;
+}
+
+#clearShortcut {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+/* 下拉框样式 */
+.select-input {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  font-size: 14px;
+  background: var(--bg-color);
+  color: var(--text-color);
+  cursor: pointer;
+  flex: 1;
+  appearance: none;  /* 移除默认样式 */
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+  padding-right: 32px;
+}
+
+.select-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+/* 暗色主题支持 */
+@media (prefers-color-scheme: dark) {
+  .select-input {
+    background-color: #2a2a2a;
+    color: white;
+    border-color: #333333;
+  }
 } 

@@ -44,6 +44,17 @@ A browser extension that allows you to quickly send selected text to various AI 
 
 ## Version History
 
+### v1.0.3
+* feat(tab): add tab behavior setting for each AI assistant
+- Add option to reuse existing tab or create new tab
+- Add tab behavior selector in assistant edit dialog
+- Implement tab reuse logic in background script
+
+### v1.0.2
+- chatgpt The reason mode can be set
+- deepseek Allows you to set the deepthink and search modes
+- kimi supports the thinking and search mode
+
 ### v1.0.1
 - Implement the plug-in UI
 - Support AI assistant disable, edit, delete functions

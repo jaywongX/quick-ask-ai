@@ -1,4 +1,4 @@
-import { DEFAULT_ASSISTANTS, FEATURE_TEMPLATES } from './config.js';
+import { DEFAULT_ASSISTANTS, FEATURE_TEMPLATES, SHORTCUT_CONSTANTS, DISPLAY_NAMES } from './config.js';
 
 // 初始化页面
 document.addEventListener('DOMContentLoaded', async () => {
@@ -17,12 +17,26 @@ async function initializeUI() {
 async function loadAssistantsData() {
   const result = await chrome.storage.sync.get('aiAssistants');
   
+  // 返回数据，如果不存在则返回默认值
   return result.aiAssistants || DEFAULT_ASSISTANTS;
 }
 
 // 保存AI助手数据
 async function saveAssistantsData(data) {
-  await chrome.storage.sync.set({ aiAssistants: data });
+  try {
+    // 检查数据大小
+    const jsonSize = new Blob([JSON.stringify(data)]).size;
+    if (jsonSize > chrome.storage.sync.QUOTA_BYTES) {
+      throw new Error('Storage quota exceeded');
+    }
+    
+    await chrome.storage.sync.set({ aiAssistants: data });
+  } catch (error) {
+    if (error.message === 'Storage quota exceeded') {
+      showToast('Storage quota exceeded. Try removing some custom features.', 'error');
+    }
+    throw error;
+  }
 }
 
 // 渲染AI列表
@@ -31,30 +45,29 @@ function renderAIList(assistants) {
   aiList.innerHTML = '';
 
   // 按order排序
-  const sortedAssistants = Object.values(assistants)
-    .sort((a, b) => a.order - b.order);
+  const sortedAssistants = Object.entries(assistants)
+    .sort(([_, a], [__, b]) => a.order - b.order);
 
-  sortedAssistants.forEach(assistant => {
-    const aiItem = createAIListItem(assistant);
+  sortedAssistants.forEach(([id, assistant]) => {
+    const aiItem = createAIListItem(assistant, id);
     aiList.appendChild(aiItem);
   });
 }
 
 // 创建AI列表项
-function createAIListItem(assistant) {
+function createAIListItem(assistant, id) {
   const item = document.createElement('div');
   item.className = 'ai-item';
   item.draggable = true;
-  item.dataset.id = assistant.id;
-
-  // 使用textContent而不是innerHTML来防止XSS
-  const nameDiv = document.createElement('div');
-  nameDiv.className = 'ai-name';
-  nameDiv.textContent = assistant.name;
+  item.dataset.id = id;
 
   const dragDiv = document.createElement('div');
   dragDiv.className = 'ai-drag';
   dragDiv.textContent = '↕️';
+
+  const nameDiv = document.createElement('div');
+  nameDiv.className = 'ai-name';
+  nameDiv.textContent = DISPLAY_NAMES[id];
 
   const actionsDiv = document.createElement('div');
   actionsDiv.className = 'ai-actions';
@@ -85,6 +98,10 @@ const CONFIG = {
 
 // 当前编辑的AI助手ID
 let currentEditId = null;
+// 快捷键相关的变量
+let isRecording = false;
+let currentModifiers = [];
+let currentKey = '';
 
 // 对话框管理
 const DialogManager = {
@@ -127,8 +144,76 @@ function hideDeleteFeatureDialog() {
   deleteFeatureId = null;
 }
 
+// 初始化快捷键设置
+function initShortcutSetting() {
+  const editShortcut = document.getElementById('editShortcut');
+  const clearShortcut = document.getElementById('clearShortcut');
+  
+  editShortcut.addEventListener('focus', () => {
+    isRecording = true;
+    editShortcut.value = 'Press keys...';
+    currentModifiers = [];
+    currentKey = '';
+  });
+  
+  editShortcut.addEventListener('blur', async () => {
+    isRecording = false;
+    if (!currentKey) {
+      const data = await loadAssistantsData();
+      const assistant = data.assistants[currentEditId];
+      editShortcut.value = assistant?.shortcut?.description || '';
+    }
+  });
+  
+  document.addEventListener('keydown', (e) => {
+    if (!isRecording) return;
+    e.preventDefault();
+    
+    const key = e.key;
+    if (SHORTCUT_CONSTANTS.FORBIDDEN_KEYS.includes(key)) return;
+    
+    // 处理修饰键
+    const modifierMap = {
+      'Alt': 'Alt',
+      'Control': 'Control',
+      'Shift': 'Shift'
+    };
+    
+    if (key in modifierMap) {
+      const modifier = modifierMap[key];
+      if (!currentModifiers.includes(modifier)) {
+        currentModifiers.push(modifier);
+      }
+    } else {
+      // 对于字母键，统一存储为大写
+      currentKey = key.length === 1 ? key.toUpperCase() : key;
+    }
+    
+    if (currentModifiers.length > SHORTCUT_CONSTANTS.MAX_MODIFIERS) {
+      currentModifiers = currentModifiers.slice(-SHORTCUT_CONSTANTS.MAX_MODIFIERS);
+    }
+    
+    const description = [...currentModifiers, currentKey].join(' + ');
+    editShortcut.value = description;
+    
+    if (currentKey) {
+      isRecording = false;
+      editShortcut.blur();
+    }
+  });
+  
+  clearShortcut.addEventListener('click', () => {
+    currentModifiers = [];
+    currentKey = '';
+    editShortcut.value = '';
+  });
+}
+
 // 设置事件监听器
 function setupEventListeners() {
+  // 初始化快捷键设置
+  initShortcutSetting();
+
   // 重置按钮
   document.getElementById('resetBtn').addEventListener('click', () => {
     showResetDialog();
@@ -147,11 +232,7 @@ function setupEventListeners() {
       renderAIList(data.assistants);
       
       // 通知 background 更新右键菜单
-      try {
-        await chrome.runtime.sendMessage({ action: 'createContextMenus' });
-      } catch (error) {
-        console.warn('Failed to update context menus:', error);
-      }
+      await updateContextMenus();
       
       // 关闭对话框
       DialogManager.hideAllDialogs();
@@ -411,90 +492,43 @@ function setupEventListeners() {
 // 初始化拖拽排序
 function initializeDragAndDrop() {
   const aiList = document.getElementById('aiList');
-
-  // 拖拽开始
+  
+  let draggedItem = null;
+  
   aiList.addEventListener('dragstart', e => {
-    if (e.target.classList.contains('ai-item')) {
-      e.target.classList.add('dragging');
-    }
+    draggedItem = e.target;
+    e.target.classList.add('dragging');
   });
-
-  // 拖拽结束
+  
   aiList.addEventListener('dragend', async e => {
-    if (e.target.classList.contains('ai-item')) {
-      e.target.classList.remove('dragging');
-      
-      // 更新顺序
-      const items = [...aiList.querySelectorAll('.ai-item')];
-      const data = await loadAssistantsData();
-      
-      items.forEach((item, index) => {
-        data.assistants[item.dataset.id].order = index;
-      });
-      
-      await saveAssistantsData(data);
-      await updateContextMenus();
-    }
+    e.target.classList.remove('dragging');
+    
+    // 获取新的排序
+    const items = [...aiList.children];
+    const data = await loadAssistantsData();
+    
+    // 更新每个助手的顺序
+    items.forEach((item, index) => {
+      const id = item.dataset.id;
+      data.assistants[id].order = index;
+    });
+    
+    // 保存新顺序
+    await saveAssistantsData(data);
+    
+    // 更新右键菜单
+    await updateContextMenus();
   });
-
-  // 拖拽过程中
-  aiList.addEventListener('dragover', e => {
-    e.preventDefault();
-    const draggable = document.querySelector('.dragging');
-    if (!draggable) return;
-
-    const afterElement = getDragAfterElement(aiList, e.clientY);
-    if (afterElement && afterElement !== draggable && !draggable.contains(afterElement)) {
-      aiList.insertBefore(draggable, afterElement);
-    } else if (!afterElement && draggable.nextSibling) {
-      aiList.appendChild(draggable);
-    }
-  });
-
-  // 获取拖拽后的位置
-  function getDragAfterElement(container, y) {
-    const draggableElements = [...container.querySelectorAll('.ai-item:not(.dragging)')];
-
-    return draggableElements.reduce((closest, child) => {
-      const box = child.getBoundingClientRect();
-      const offset = y - box.top - box.height / 2;
-      if (offset < 0 && offset > closest.offset) {
-        return { offset: offset, element: child };
-      } else {
-        return closest;
-      }
-    }, { offset: Number.NEGATIVE_INFINITY }).element;
-  }
 }
 
 // 更新右键菜单
 async function updateContextMenus() {
-  // 清除现有菜单
-  await chrome.contextMenus.removeAll();
-  
-  // 创建父菜单
-  chrome.contextMenus.create({
-    id: "quickSearchAI",
-    title: "Quick Search AI",
-    contexts: ["selection"]
-  });
-
-  // 获取配置并创建子菜单
-  const data = await loadAssistantsData();
-  const assistants = data.assistants;
-  
-  // 只为启用的AI助手创建菜单
-  Object.values(assistants)
-    .filter(assistant => assistant.enabled)
-    .sort((a, b) => a.order - b.order)
-    .forEach(assistant => {
-      chrome.contextMenus.create({
-        id: `searchWith${assistant.id}`,
-        parentId: "quickSearchAI",
-        title: `Search with ${assistant.name}`,
-        contexts: ["selection"]
-      });
-    });
+  try {
+    // 通知 background 更新右键菜单
+    await chrome.runtime.sendMessage({ action: 'createContextMenus' });
+  } catch (error) {
+    console.warn('Failed to update context menus:', error);
+  }
 }
 
 // 更新显示/隐藏对话框的函数
@@ -518,14 +552,21 @@ async function showEditDialog(id) {
   const data = await loadAssistantsData();
   const assistant = data.assistants[id];
   
-  document.getElementById('editName').value = assistant.name;
+  document.getElementById('editName').value = DISPLAY_NAMES[id];
   document.getElementById('editUrl').value = assistant.url;
+  document.getElementById('editShortcut').value = assistant.shortcut?.description || '';
+  document.getElementById('editTabBehavior').value = assistant.tabBehavior || 'new';
+  currentKey = assistant.shortcut?.key || '';
+  currentModifiers = assistant.shortcut?.modifiers || [];
   
-  // 渲染功能设置列表
-  const capabilitiesList = document.getElementById('editCapabilitiesList');
-  capabilitiesList.innerHTML = '';
-  
-  if (assistant.capabilities) {
+  // 根据是否有 capabilities 来显示或隐藏相关部分
+  const capabilitiesSection = document.getElementById('capabilitiesSection');
+  if (assistant.capabilities && Object.keys(assistant.capabilities).length > 0) {
+    capabilitiesSection.style.display = 'block';
+    // 渲染功能设置列表
+    const capabilitiesList = document.getElementById('editCapabilitiesList');
+    capabilitiesList.innerHTML = '';
+    
     Object.entries(assistant.capabilities).forEach(([capId, capability]) => {
       const button = document.createElement('button');
       button.className = `capability-toggle ${capability.enabled ? 'active' : ''}`;
@@ -533,6 +574,8 @@ async function showEditDialog(id) {
       button.textContent = capability.name;
       capabilitiesList.appendChild(button);
     });
+  } else {
+    capabilitiesSection.style.display = 'none';
   }
   
   // 渲染询问模式列表
@@ -582,13 +625,47 @@ function validateForm() {
 async function handleEditFormSubmit(e) {
   e.preventDefault();
   
+  // 显示保存中状态
+  const saveButton = document.getElementById('editSave');
+  const originalText = saveButton.textContent;
+  saveButton.textContent = 'Saving...';
+  saveButton.disabled = true;
+  
   try {
-    const data = await loadAssistantsData();
-    const assistant = data.assistants[currentEditId];
+    let data = {
+      assistants: (await loadAssistantsData()).assistants
+    };
     
-    // 更新基本信息
-    assistant.name = document.getElementById('editName').value.trim();
-    assistant.url = document.getElementById('editUrl').value.trim();
+    const assistant = data.assistants[currentEditId];
+    if (!assistant) {
+      throw new Error(`Assistant not found: ${currentEditId}`);
+    }
+    
+    // 检查 URL 可访问性
+    const url = document.getElementById('editUrl').value.trim();
+    
+    assistant.url = url;
+    assistant.tabBehavior = document.getElementById('editTabBehavior').value;
+    
+    // 更新快捷键设置
+    if (currentKey) {
+      const newShortcut = {
+        enabled: true,
+        key: currentKey,
+        modifiers: currentModifiers,
+        description: document.getElementById('editShortcut').value
+      };
+      
+      const { hasConflict, conflictWith } = await checkShortcutConflict(newShortcut, currentEditId);
+      if (hasConflict) {
+        showToast(`Shortcut conflicts with ${conflictWith}`, 'error');
+        return;
+      }
+      
+      assistant.shortcut = newShortcut;
+    } else {
+      assistant.shortcut = null;
+    }
     
     // 更新功能设置
     if (assistant.capabilities) {
@@ -605,10 +682,13 @@ async function handleEditFormSubmit(e) {
     renderAIList(data.assistants);
     
     DialogManager.hideDialog('editDialog');
-    showToast('AI Assistant updated successfully');
+    showToast('Settings saved successfully', 'success');
   } catch (error) {
-    console.error('[Quick Search AI] Error updating assistant:', error);
-    showToast('Failed to update AI Assistant', 'error');
+    showToast(error.message, 'error');
+  } finally {
+    // 恢复按钮状态
+    saveButton.textContent = originalText;
+    saveButton.disabled = false;
   }
 }
 
@@ -766,10 +846,12 @@ async function restoreEditDialog() {
   }
 
   // 恢复表单数据
-  document.getElementById('editName').value = assistant.name;
+  document.getElementById('editName').value = DISPLAY_NAMES[currentEditId];
   document.getElementById('editUrl').value = assistant.url;
-  document.getElementById('editTextAreaSelector').value = assistant.selectors.textArea;
-  document.getElementById('editSubmitSelector').value = assistant.selectors.submitButton;
+  document.getElementById('editShortcut').value = assistant.shortcut?.description || '';
+  document.getElementById('editTabBehavior').value = assistant.tabBehavior || 'new';
+  currentKey = assistant.shortcut?.key || '';
+  currentModifiers = assistant.shortcut?.modifiers || [];
 
   // 显示对话框
   DialogManager.showDialog('editDialog');
@@ -971,4 +1053,124 @@ async function renderAssistant(assistant) {
       capabilitiesList.appendChild(button);
     });
   }
+}
+
+function initEditDialog() {
+  const editDialog = document.getElementById('editDialog');
+  const editForm = document.getElementById('editForm');
+  const editName = document.getElementById('editName');
+  const editUrl = document.getElementById('editUrl');
+  const editShortcut = document.getElementById('editShortcut');
+  const clearShortcut = document.getElementById('clearShortcut');
+  
+  let currentAssistant = null;
+  
+  // 快捷键录入处理
+  let isRecording = false;
+  let currentModifiers = [];
+  let currentKey = '';
+  
+  editShortcut.addEventListener('focus', () => {
+    isRecording = true;
+    editShortcut.value = 'Press keys...';
+    currentModifiers = [];
+    currentKey = '';
+  });
+  
+  editShortcut.addEventListener('blur', () => {
+    isRecording = false;
+    if (!currentKey) {
+      editShortcut.value = currentAssistant?.shortcut?.description || '';
+    }
+  });
+  
+  document.addEventListener('keydown', (e) => {
+    if (!isRecording) return;
+    e.preventDefault();
+    
+    const key = e.key;
+    if (SHORTCUT_CONSTANTS.FORBIDDEN_KEYS.includes(key)) return;
+    
+    if (SHORTCUT_CONSTANTS.MODIFIER_KEYS.includes(key)) {
+      if (!currentModifiers.includes(key)) {
+        currentModifiers.push(key);
+      }
+    } else {
+      currentKey = key;
+    }
+    
+    if (currentModifiers.length > SHORTCUT_CONSTANTS.MAX_MODIFIERS) {
+      currentModifiers = currentModifiers.slice(-SHORTCUT_CONSTANTS.MAX_MODIFIERS);
+    }
+    
+    const description = [...currentModifiers, currentKey].join(' + ');
+    editShortcut.value = description;
+    
+    if (currentKey) {
+      isRecording = false;
+      editShortcut.blur();
+    }
+  });
+  
+  clearShortcut.addEventListener('click', () => {
+    currentModifiers = [];
+    currentKey = '';
+    editShortcut.value = '';
+  });
+  
+  // 打开编辑对话框
+  function openEditDialog(assistant) {
+    currentAssistant = assistant;
+    editName.value = assistant.name;
+    editUrl.value = assistant.url;
+    editShortcut.value = assistant.shortcut?.description || '';
+    // ... 其他初始化代码
+  }
+  
+  // 在保存快捷键之前检查冲突
+  editForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    if (currentKey) {
+      const newShortcut = {
+        enabled: true,
+        key: currentKey,
+        modifiers: currentModifiers,
+        description: editShortcut.value
+      };
+      
+      const { hasConflict, conflictWith } = await checkShortcutConflict(newShortcut, currentAssistant.id);
+      if (hasConflict) {
+        showToast(`Shortcut conflicts with ${conflictWith}`, 'error');
+        return;
+      }
+    }
+    // ... 保存逻辑
+  });
+}
+
+// 在 popup.js 中添加快捷键冲突检查
+async function checkShortcutConflict(newShortcut, currentAssistantId) {
+  const data = await loadAssistantsData();
+  const assistants = data.assistants;
+  
+  for (const [id, assistant] of Object.entries(assistants)) {
+    if (id === currentAssistantId) continue;
+    if (!assistant.shortcut?.enabled) continue;
+    
+    const existing = assistant.shortcut;
+    if (existing.key === newShortcut.key && 
+        arraysEqual(existing.modifiers, newShortcut.modifiers)) {
+      return {
+        hasConflict: true,
+        conflictWith: DISPLAY_NAMES[id]
+      };
+    }
+  }
+  return { hasConflict: false };
+}
+
+function arraysEqual(a, b) {
+  return a.length === b.length && 
+         a.every((val, index) => val === b[index]);
 }

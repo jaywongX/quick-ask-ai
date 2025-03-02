@@ -54,14 +54,31 @@
                   <input type="url" id="editUrl" required>
                 </div>
               </div>
-            </div>
-            <div class="capabilities-section">
               <div class="form-group">
                 <div class="input-row">
-                  <label class="form-label">Capabilities</label>
-                  <div id="editCapabilitiesList" class="capabilities-list">
-                    <!-- Capabilities will be populated by JavaScript -->
+                  <label class="form-label" for="editShortcut">Shortcut</label>
+                  <div class="shortcut-input-group">
+                    <input type="text" id="editShortcut" readonly
+                           placeholder="Click to set shortcut">
+                    <button type="button" class="btn" id="clearShortcut">Clear</button>
                   </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="input-row">
+                  <label class="form-label" for="editTabBehavior">Tab Behavior</label>
+                  <select id="editTabBehavior" class="select-input">
+                    <option value="new">Always new tab</option>
+                    <option value="reuse">Reuse existing tab</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div id="capabilitiesSection" class="form-group">
+              <div class="input-row">
+                <label class="form-label">Capabilities</label>
+                <div id="editCapabilitiesList" class="capabilities-list">
+                  <!-- 功能按钮将在这里动态添加 -->
                 </div>
               </div>
             </div>
@@ -171,26 +188,6 @@
           <button id="deleteFeatureCancel" class="btn">Cancel</button>
           <button id="deleteFeatureConfirm" class="btn primary">Delete</button>
         </div>
-      </div>
-    </div>
-
-    <div class="assistant-item">
-      <!-- 现有的助手配置 -->
-      <div class="assistant-header">
-        <span class="assistant-name"></span>
-        <label class="switch">
-          <span class="slider"></span>
-        </label>
-      </div>
-      <!-- 添加功能设置面板 -->
-      <div class="capabilities-panel">
-        <div class="capabilities-list">
-          <!-- 动态插入功能项 -->
-        </div>
-      </div>
-      <!-- 现有的特性设置面板 -->
-      <div class="features-panel">
-        <!-- ... -->
       </div>
     </div>
   </div>

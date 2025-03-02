@@ -152,48 +152,47 @@ class AIHandler {
 
   // 处理文本输入
   async handleTextInput(text) {
-    try {
-      const selectors = await this.getSelectors();
-      const textArea = await this.waitForElement(selectors.textArea);
-      if (!textArea) {
-        throw new Error('Text area not found');
-      }
-      
-      switch (this.config.inputMethod) {
-        case 'innerHTML':
-          textArea.innerHTML = `<p>${text}</p>`;
-          textArea.dispatchEvent(new InputEvent('input', {
-            bubbles: true,
-            cancelable: true,
-            inputType: 'insertText',
-            data: text
-          }));
-          break;
-          
-        case 'execCommand':
-          textArea.focus();
-          textArea.innerHTML = '';
-          document.execCommand('insertText', false, text);
-          if (!textArea.textContent) {
-            textArea.innerHTML = `<p>${text}</p>`;
-          }
-          ['input', 'change', 'keyup', 'keydown'].forEach(eventType => {
-            textArea.dispatchEvent(new Event(eventType, { bubbles: true }));
-          });
-          break;
-          
-        default: // value
-          textArea.value = text;
-          textArea.dispatchEvent(new Event('input', { bubbles: true }));
-          textArea.dispatchEvent(new Event('change', { bubbles: true }));
-      }
-      
-      console.log(`[Quick Search AI] ${this.aiId} text input successful`);
-      return textArea;
-    } catch (error) {
-      console.error(`[Quick Search AI] Error during ${this.aiId} text input:`, error);
-      throw error;
+    // 防止 XSS
+    text = text.replace(/[<>]/g, '');
+    
+    const selectors = await this.getSelectors();
+    const textArea = await this.waitForElement(selectors.textArea, { timeout: 10000 });
+    
+    if (!textArea) {
+      throw new Error('Text area not found');
     }
+    
+    switch (this.config.inputMethod) {
+      case 'innerHTML':
+        textArea.innerHTML = `<p>${text}</p>`;
+        textArea.dispatchEvent(new InputEvent('input', {
+          bubbles: true,
+          cancelable: true,
+          inputType: 'insertText',
+          data: text
+        }));
+        break;
+        
+      case 'execCommand':
+        textArea.focus();
+        textArea.innerHTML = '';
+        document.execCommand('insertText', false, text);
+        if (!textArea.textContent) {
+          textArea.innerHTML = `<p>${text}</p>`;
+        }
+        ['input', 'change', 'keyup', 'keydown'].forEach(eventType => {
+          textArea.dispatchEvent(new Event(eventType, { bubbles: true }));
+        });
+        break;
+        
+      default: // value
+        textArea.value = text;
+        textArea.dispatchEvent(new Event('input', { bubbles: true }));
+        textArea.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    
+    console.log(`[Quick Search AI] ${this.aiId} text input successful`);
+    return textArea;
   }
 
   // 处理提交
@@ -243,14 +242,16 @@ class AIHandler {
   // 处理功能状态
   async handleCapabilities() {
     const assistant = await getAssistantConfig(this.aiId);
-    if (!assistant?.capabilities) return;
-    
+    if (!assistant?.capabilities) {
+      console.log(`[Quick Search AI] No capabilities for ${this.aiId}`);
+      return;
+    }
     const promises = [];
     
     Object.entries(assistant.capabilities).forEach(([capId, capability]) => {
       if (!capability.selector) return;
       
-      const buttonText = capability.text;
+      const buttonText = capability.name;
       
       const promise = new Promise(resolve => {
         waitForElement(capability.selector, buttonText, (element) => {
@@ -319,58 +320,129 @@ class AIHandler {
   }
 }
 
-// 主函数
+// 初始化快捷键监听
+async function initShortcutListener() {
+  document.addEventListener('keydown', async (e) => {
+    if (e.target.tagName === 'INPUT' || 
+        e.target.tagName === 'TEXTAREA' || 
+        e.target.isContentEditable) {
+      return;
+    }
+
+    const selectedText = window.getSelection().toString().trim();
+    if (!selectedText) return;
+    
+    await handleShortcutMatch(e, selectedText);
+  });
+}
+
+// 处理快捷键匹配
+async function handleShortcutMatch(e, selectedText) {
+  const data = await chrome.storage.sync.get('aiAssistants');
+  const assistants = data.aiAssistants.assistants;
+  
+  for (const [id, assistant] of Object.entries(assistants)) {
+    if (!assistant.shortcut?.enabled) continue;
+    
+    const { key, modifiers } = assistant.shortcut;
+    const matchesKey = e.key.toLowerCase() === key.toLowerCase();
+    
+    const matchesModifiers = 
+      modifiers.includes('Alt') === e.altKey &&
+      modifiers.includes('Control') === e.ctrlKey &&
+      modifiers.includes('Shift') === e.shiftKey;
+    
+    if (matchesKey && matchesModifiers) {
+      e.preventDefault();
+      await openAssistantWithShortcut(id, selectedText);
+      break;
+    }
+  }
+}
+
+// 使用快捷键打开助手
+async function openAssistantWithShortcut(assistantId, selectedText) {
+  try {
+    await chrome.runtime.sendMessage({
+      action: 'openAssistant',
+      assistantId,
+      selectedText
+    });
+  } catch (error) {
+    if (error.message !== 'The message port closed before a response was received.') {
+      console.error('[Quick Search AI] Error:', error);
+    }
+  }
+}
+
+// 初始化消息监听
+function initMessageListener() {
+  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'detectSelector') {
+      detectSelector(request.type).then(selector => {
+        sendResponse({ selector });
+      });
+      return true;
+    }
+  });
+}
+
+// 初始化功能状态
+async function initCapabilities() {
+  const currentUrl = window.location.href;
+  const data = await chrome.storage.sync.get('aiAssistants');
+  
+  const [assistantId, _] = Object.entries(data.aiAssistants.assistants).find(
+    ([_, a]) => currentUrl.startsWith(a.url)
+  ) || [];
+  
+  if (assistantId) {
+    const handler = new AIHandler(assistantId);
+    return {
+      handler,
+      capabilitiesPromise: handler.handleCapabilities()
+    };
+  }
+  
+  return { handler: null, capabilitiesPromise: Promise.resolve() };
+}
+
+// 处理待处理的查询
+async function handlePendingQuery(handler, capabilitiesPromise) {
+  const data = await chrome.storage.local.get(['selectedText', 'aiProvider']);
+  if (!data.selectedText || !data.aiProvider) return;
+  
+  await capabilitiesPromise;
+  await chrome.storage.local.remove(['selectedText', 'aiProvider']);
+
+  if (!handler || handler.aiId !== data.aiProvider) {
+    handler = new AIHandler(data.aiProvider);
+  }
+  
+  const textArea = await handler.handleTextInput(data.selectedText);
+  await handler.handleSubmit(textArea);
+}
+
+// 主初始化函数
 async function init() {
   console.log('[Quick Search AI] Initializing');
 
   try {
-    // 监听来自 popup 的消息
-    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-      if (request.action === 'detectSelector') {
-        detectSelector(request.type).then(selector => {
-          sendResponse({ selector });
-        });
-        return true;
-      }
-    });
+    // 初始化各个模块
+    await initShortcutListener();
+    initMessageListener();
 
     // 等待页面加载完成
     if (document.readyState !== 'complete') {
       await new Promise(resolve => window.addEventListener('load', resolve));
     }
-    
-    // 处理功能状态
-    let handler;
-    let capabilitiesPromise;
-    {
-      const currentUrl = window.location.href;
-      const data = await chrome.storage.sync.get('aiAssistants');
-      
-      const assistant = Object.values(data.aiAssistants.assistants).find(
-        a => currentUrl.startsWith(a.url)
-      );
-      
-      if (assistant) {
-        handler = new AIHandler(assistant.id);
-        capabilitiesPromise = handler.handleCapabilities();
-      }
-    }
 
-    // 检查是否有待处理的查询操作
-    const data = await chrome.storage.local.get(['selectedText', 'aiProvider']);
-    if (data.selectedText && data.aiProvider) {
-      // 等待功能状态处理完成
-      await capabilitiesPromise;
-      
-      await chrome.storage.local.remove(['selectedText', 'aiProvider']);
+    // 初始化功能状态
+    const { handler, capabilitiesPromise } = await initCapabilities();
 
-      if (!handler || handler.aiId !== data.aiProvider) {
-        handler = new AIHandler(data.aiProvider);
-      }
-      
-      const textArea = await handler.handleTextInput(data.selectedText);
-      await handler.handleSubmit(textArea);
-    }
+    // 处理待处理的查询
+    await handlePendingQuery(handler, capabilitiesPromise);
+
   } catch (error) {
     console.error('[Quick Search AI] Error:', error);
   }
@@ -378,6 +450,39 @@ async function init() {
 
 // Start processing
 init();
+
+// 监听来自 background 的消息
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === 'executeQuery') {
+    let cleanup;
+    try {
+      chrome.storage.local.get(['selectedText', 'aiProvider'], async (data) => {
+        if (data.selectedText && data.aiProvider) {
+          const handler = new AIHandler(data.aiProvider);
+          cleanup = () => {
+            // 清理资源
+            handler.cleanup?.();
+          };
+          try {
+            const textArea = await handler.handleTextInput(data.selectedText);
+            if (textArea) {
+              await handler.handleSubmit(textArea);
+            }
+          } finally {
+            cleanup?.();
+          }
+        }
+      });
+    } catch (error) {
+      // 检查是否是扩展上下文失效错误
+      if (error.message.includes('Extension context invalidated')) {
+        console.log('[Quick Search AI] Extension reloaded, stopping execution');
+        return;
+      }
+      console.error('[Quick Search AI] Error:', error);
+    }
+  }
+});
 
 // 检测选择器
 async function detectSelector(type) {
