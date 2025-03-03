@@ -126,7 +126,7 @@
       "message": "Prompt Template"
     },
     "help_prompt_template": {
-      "message": "Use {text} to represent the selected text"
+      "message": "Use $${text} to represent the selected text"
     },
     "label_name": {
       "message": "Name"
@@ -196,16 +196,16 @@
       "message": "Internet Search"
     },
     "prompt_question": {
-      "message": "What is {text}? Can you explain it?"
+      "message": "What is $${text}? Can you explain it?"
     },
     "prompt_explain": {
-      "message": "Please explain in detail the principles and uses of {text}."
+      "message": "Please explain in detail the principles and uses of $${text}."
     },
     "prompt_summarize": {
-      "message": "Please provide a concise summary of:\n{text}"
+      "message": "Please provide a concise summary of:\n$${text}"
     },
     "prompt_research": {
-      "message": "Please provide a detailed analysis of {text}, including:\n1. Key concepts\n2. Historical context\n3. Current developments\n4. Future implications"
+      "message": "Please provide a detailed analysis of $${text}, including:\n1. Key concepts\n2. Historical context\n3. Current developments\n4. Future implications"
     },
     "shortcut_help_windows": {
       "message": "Use Alt/Ctrl/Shift + key combinations"

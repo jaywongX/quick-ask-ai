@@ -44,6 +44,9 @@ A browser extension that allows you to quickly send selected text to various AI 
 
 ## Version History
 
+### v1.0.4
+* feat(i18n): improve internationalization implementation
+
 ### v1.0.3
 * feat(tab): add tab behavior setting for each AI assistant
 - Add option to reuse existing tab or create new tab
