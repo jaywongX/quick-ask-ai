@@ -1,4 +1,5 @@
-import { DEFAULT_ASSISTANTS, FEATURE_TEMPLATES, SHORTCUT_CONSTANTS, DISPLAY_NAMES } from './config.js';
+import { DEFAULT_ASSISTANTS, FEATURE_TEMPLATES, SHORTCUT_CONSTANTS } from './config.js';
+import { i18n } from './i18n.js';
 
 // 初始化页面
 document.addEventListener('DOMContentLoaded', async () => {
@@ -11,6 +12,9 @@ async function initializeUI() {
   const data = await loadAssistantsData();
   renderAIList(data.assistants);
   initializeDragAndDrop();
+  
+  // 初始化页面国际化
+  i18n.initializeI18n();
 }
 
 // 加载AI助手数据
@@ -67,16 +71,16 @@ function createAIListItem(assistant, id) {
 
   const nameDiv = document.createElement('div');
   nameDiv.className = 'ai-name';
-  nameDiv.textContent = DISPLAY_NAMES[id];
+  nameDiv.textContent = i18n.getMessage(id);
 
   const actionsDiv = document.createElement('div');
   actionsDiv.className = 'ai-actions';
   actionsDiv.innerHTML = `
     <button class="toggle-btn ${assistant.enabled ? 'enabled' : 'disabled'}" data-action="toggle">
-      ${assistant.enabled ? 'Enabled' : 'Disabled'}
+      ${assistant.enabled ? i18n.getMessage('status_enabled') : i18n.getMessage('status_disabled')}
     </button>
-    <button class="action-btn" data-action="edit" title="Edit">⚙️</button>
-    <button class="action-btn" data-action="delete" title="Delete">🗑️</button>
+    <button class="action-btn" data-action="edit" title="${i18n.getMessage('button_edit')}">⚙️</button>
+    <button class="action-btn" data-action="delete" title="${i18n.getMessage('button_delete')}">🗑️</button>
   `;
 
   item.appendChild(dragDiv);
@@ -519,6 +523,36 @@ function initializeDragAndDrop() {
     // 更新右键菜单
     await updateContextMenus();
   });
+
+  // 添加 dragover 事件处理
+  aiList.addEventListener('dragover', e => {
+    e.preventDefault();
+    const draggable = aiList.querySelector('.dragging');
+    if (!draggable) return;
+  
+    const afterElement = getDragAfterElement(aiList, e.clientY);
+    if (afterElement) {
+      aiList.insertBefore(draggable, afterElement);
+    } else {
+      aiList.appendChild(draggable);
+    }
+  });
+}
+
+// 获取拖拽后的位置
+function getDragAfterElement(container, y) {
+  const draggableElements = [...container.querySelectorAll('.ai-item:not(.dragging)')];
+
+  return draggableElements.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    
+    if (offset < 0 && offset > closest.offset) {
+      return { offset: offset, element: child };
+    } else {
+      return closest;
+    }
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
 // 更新右键菜单
@@ -552,7 +586,7 @@ async function showEditDialog(id) {
   const data = await loadAssistantsData();
   const assistant = data.assistants[id];
   
-  document.getElementById('editName').value = DISPLAY_NAMES[id];
+  document.getElementById('editName').value = i18n.getMessage(id);
   document.getElementById('editUrl').value = assistant.url;
   document.getElementById('editShortcut').value = assistant.shortcut?.description || '';
   document.getElementById('editTabBehavior').value = assistant.tabBehavior || 'new';
@@ -846,7 +880,7 @@ async function restoreEditDialog() {
   }
 
   // 恢复表单数据
-  document.getElementById('editName').value = DISPLAY_NAMES[currentEditId];
+  document.getElementById('editName').value = i18n.getMessage(currentEditId);
   document.getElementById('editUrl').value = assistant.url;
   document.getElementById('editShortcut').value = assistant.shortcut?.description || '';
   document.getElementById('editTabBehavior').value = assistant.tabBehavior || 'new';
@@ -1020,22 +1054,6 @@ function initializeFeaturesDragAndDrop() {
   });
 }
 
-// 获取拖拽后的位置
-function getDragAfterElement(container, y) {
-  const draggableElements = [...container.querySelectorAll('.feature-item:not(.dragging)')];
-
-  return draggableElements.reduce((closest, child) => {
-    const box = child.getBoundingClientRect();
-    const offset = y - box.top - box.height / 2;
-    
-    if (offset < 0 && offset > closest.offset) {
-      return { offset: offset, element: child };
-    } else {
-      return closest;
-    }
-  }, { offset: Number.NEGATIVE_INFINITY }).element;
-}
-
 // 渲染助手配置
 async function renderAssistant(assistant) {
   // ... 现有代码 ...
@@ -1163,7 +1181,7 @@ async function checkShortcutConflict(newShortcut, currentAssistantId) {
         arraysEqual(existing.modifiers, newShortcut.modifiers)) {
       return {
         hasConflict: true,
-        conflictWith: DISPLAY_NAMES[id]
+        conflictWith: i18n.getMessage(id)
       };
     }
   }

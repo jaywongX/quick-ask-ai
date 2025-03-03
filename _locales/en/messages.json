@@ -1,0 +1,216 @@
+{
+    "extension_name": {
+      "message": "Quick Search AI"
+    },
+    "extension_description": {
+      "message": "Select text and search with AI assistants"
+    },
+    "popup_title": {
+      "message": "Quick Search AI"
+    },
+    "button_reset": {
+      "message": "Reset all settings"
+    },
+    "button_feedback": {
+      "message": "Send feedback"
+    },
+    "button_donate": {
+      "message": "Support this project"
+    },
+    "button_edit": {
+      "message": "Edit"
+    },
+    "button_delete": {
+      "message": "Delete"
+    },
+    "button_cancel": {
+      "message": "Cancel"
+    },
+    "button_confirm": {
+      "message": "Confirm"
+    },
+    "button_save": {
+      "message": "Save"
+    },
+    "button_close": {
+      "message": "Close"
+    },
+    "dialog_edit": {
+      "message": "Edit AI Assistant"
+    },
+    "dialog_reset": {
+      "message": "Reset Settings"
+    },
+    "dialog_reset_confirm": {
+      "message": "Are you sure you want to reset all settings to default?"
+    },
+    "dialog_delete": {
+      "message": "Delete AI Assistant"
+    },
+    "dialog_delete_confirm": {
+      "message": "Are you sure you want to delete"
+    },
+    "dialog_donate": {
+      "message": "Support this project"
+    },
+    "label_url": {
+      "message": "URL"
+    },
+    "label_shortcut": {
+      "message": "Shortcut"
+    },
+    "label_tab_behavior": {
+      "message": "Tab Behavior"
+    },
+    "option_new_tab": {
+      "message": "Always new tab"
+    },
+    "option_reuse_tab": {
+      "message": "Reuse existing tab"
+    },
+    "label_capabilities": {
+      "message": "Capabilities"
+    },
+    "label_ask_modes": {
+      "message": "Ask Modes"
+    },
+    "button_add_mode": {
+      "message": "+ Add Mode"
+    },
+    "status_enabled": {
+      "message": "Enabled"
+    },
+    "status_disabled": {
+      "message": "Disabled"
+    },
+    "shortcut_press_keys": {
+      "message": "Press keys..."
+    },
+    "donate_kofi_desc": {
+      "message": "Support via Ko-fi (Overseas)"
+    },
+    "donate_afdian_desc": {
+      "message": "Support via Aifadian (Mainland China)"
+    },
+    "toast_saved": {
+      "message": "Settings saved successfully"
+    },
+    "toast_reset": {
+      "message": "Settings have been reset to default"
+    },
+    "toast_error": {
+      "message": "An error occurred"
+    },
+    "error_required_field": {
+      "message": "This field is required"
+    },
+    "error_https_required": {
+      "message": "URL must use HTTPS protocol"
+    },
+    "error_invalid_url": {
+      "message": "Please enter a valid HTTPS URL"
+    },
+    "dialog_edit_mode": {
+      "message": "Edit Ask Mode"
+    },
+    "dialog_delete_mode": {
+      "message": "Delete Ask Mode"
+    },
+    "dialog_delete_mode_confirm": {
+      "message": "Are you sure you want to delete"
+    },
+    "label_mode_name": {
+      "message": "Mode Name"
+    },
+    "label_prompt_template": {
+      "message": "Prompt Template"
+    },
+    "help_prompt_template": {
+      "message": "Use {text} to represent the selected text"
+    },
+    "label_name": {
+      "message": "Name"
+    },
+    "placeholder_shortcut": {
+      "message": "Click to set shortcut"
+    },
+    "button_clear": {
+      "message": "Clear"
+    },
+    "chatgpt": {
+      "message": "ChatGPT"
+    },
+    "deepseek": {
+      "message": "DeepSeek AI"
+    },
+    "qianwen": {
+      "message": "Qianwen"
+    },
+    "gemini": {
+      "message": "Google Gemini"
+    },
+    "perplexity": {
+      "message": "Perplexity"
+    },
+    "grok": {
+      "message": "Grok"
+    },
+    "copilot": {
+      "message": "Microsoft Copilot"
+    },
+    "ernie": {
+      "message": "ERNIE Bot"
+    },
+    "kimi": {
+      "message": "Kimi"
+    },
+    "menu_search_with": {
+      "message": "Search with $1",
+      "description": "Context menu item text. $1 will be replaced with AI assistant name"
+    },
+    "mode_question": {
+      "message": "Question Mode"
+    },
+    "mode_explain": {
+      "message": "Explain Mode"
+    },
+    "mode_summarize": {
+      "message": "Summarize"
+    },
+    "mode_research": {
+      "message": "Research Mode"
+    },
+    "capability_reason": {
+      "message": "Reason"
+    },
+    "capability_deepthink": {
+      "message": "DeepThink"
+    },
+    "capability_search": {
+      "message": "Search"
+    },
+    "capability_thinking": {
+      "message": "Thinking"
+    },
+    "capability_internet_search": {
+      "message": "Internet Search"
+    },
+    "prompt_question": {
+      "message": "What is {text}? Can you explain it?"
+    },
+    "prompt_explain": {
+      "message": "Please explain in detail the principles and uses of {text}."
+    },
+    "prompt_summarize": {
+      "message": "Please provide a concise summary of:\n{text}"
+    },
+    "prompt_research": {
+      "message": "Please provide a detailed analysis of {text}, including:\n1. Key concepts\n2. Historical context\n3. Current developments\n4. Future implications"
+    },
+    "shortcut_help_windows": {
+      "message": "Use Alt/Ctrl/Shift + key combinations"
+    },
+    "shortcut_help_mac": {
+      "message": "Use Option/Command/Shift + key combinations"
+    }
+  }

@@ -41,7 +41,7 @@ const AI_CONFIGS = {
     submitMethod: 'click',
     submitCheck: 'aria-disabled'
   },
-  yiyan: {
+  ernie: {
     inputMethod: 'execCommand',
     submitMethod: 'click',
     submitCheck: 'disabled'

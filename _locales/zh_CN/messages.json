@@ -1,0 +1,216 @@
+{
+    "extension_name": {
+      "message": "Quick Search AI"
+    },
+    "extension_description": {
+      "message": "选择文本，使用 AI 助手快速搜索"
+    },
+    "popup_title": {
+      "message": "Quick Search AI"
+    },
+    "button_reset": {
+      "message": "重置所有设置"
+    },
+    "button_feedback": {
+      "message": "发送反馈"
+    },
+    "button_donate": {
+      "message": "支持项目"
+    },
+    "button_edit": {
+      "message": "编辑"
+    },
+    "button_delete": {
+      "message": "删除"
+    },
+    "button_cancel": {
+      "message": "取消"
+    },
+    "button_confirm": {
+      "message": "确定"
+    },
+    "button_save": {
+      "message": "保存"
+    },
+    "button_close": {
+      "message": "关闭"
+    },
+    "dialog_edit": {
+      "message": "编辑 AI 助手"
+    },
+    "dialog_reset": {
+      "message": "重置设置"
+    },
+    "dialog_reset_confirm": {
+      "message": "确定要将所有设置重置为默认值吗？"
+    },
+    "dialog_delete": {
+      "message": "删除 AI 助手"
+    },
+    "dialog_delete_confirm": {
+      "message": "确定要删除"
+    },
+    "dialog_donate": {
+      "message": "支持项目"
+    },
+    "label_url": {
+      "message": "网址"
+    },
+    "label_shortcut": {
+      "message": "快捷键"
+    },
+    "label_tab_behavior": {
+      "message": "标签页行为"
+    },
+    "option_new_tab": {
+      "message": "总是新建标签页"
+    },
+    "option_reuse_tab": {
+      "message": "复用已有标签页"
+    },
+    "label_capabilities": {
+      "message": "功能"
+    },
+    "label_ask_modes": {
+      "message": "询问模式"
+    },
+    "button_add_mode": {
+      "message": "+ 添加模式"
+    },
+    "status_enabled": {
+      "message": "已启用"
+    },
+    "status_disabled": {
+      "message": "已禁用"
+    },
+    "shortcut_press_keys": {
+      "message": "请按键..."
+    },
+    "donate_kofi_desc": {
+      "message": "通过 Ko-fi 支持（海外）"
+    },
+    "donate_afdian_desc": {
+      "message": "通过爱发电支持（中国大陆）"
+    },
+    "toast_saved": {
+      "message": "设置保存成功"
+    },
+    "toast_reset": {
+      "message": "设置已重置为默认值"
+    },
+    "toast_error": {
+      "message": "发生错误"
+    },
+    "error_required_field": {
+      "message": "此字段为必填项"
+    },
+    "error_https_required": {
+      "message": "URL 必须使用 HTTPS 协议"
+    },
+    "error_invalid_url": {
+      "message": "请输入有效的 HTTPS URL"
+    },
+    "dialog_edit_mode": {
+      "message": "编辑询问模式"
+    },
+    "dialog_delete_mode": {
+      "message": "删除询问模式"
+    },
+    "dialog_delete_mode_confirm": {
+      "message": "确定要删除"
+    },
+    "label_mode_name": {
+      "message": "模式名称"
+    },
+    "label_prompt_template": {
+      "message": "提示模板"
+    },
+    "help_prompt_template": {
+      "message": "使用 {text} 表示选中的文本"
+    },
+    "label_name": {
+      "message": "名称"
+    },
+    "placeholder_shortcut": {
+      "message": "点击设置快捷键"
+    },
+    "button_clear": {
+      "message": "清除"
+    },
+    "chatgpt": {
+      "message": "ChatGPT"
+    },
+    "deepseek": {
+      "message": "DeepSeek AI"
+    },
+    "qianwen": {
+      "message": "通义千问"
+    },
+    "gemini": {
+      "message": "Google Gemini"
+    },
+    "perplexity": {
+      "message": "Perplexity"
+    },
+    "grok": {
+      "message": "Grok"
+    },
+    "copilot": {
+      "message": "Microsoft Copilot"
+    },
+    "ernie": {
+      "message": "文心一言"
+    },
+    "kimi": {
+      "message": "Kimi"
+    },
+    "menu_search_with": {
+      "message": "使用 $1 搜索",
+      "description": "右键菜单项文本。$1 将被替换为 AI 助手名称"
+    },
+    "mode_question": {
+      "message": "问答模式"
+    },
+    "mode_explain": {
+      "message": "解释模式"
+    },
+    "mode_summarize": {
+      "message": "总结模式"
+    },
+    "mode_research": {
+      "message": "研究模式"
+    },
+    "capability_reason": {
+      "message": "推理"
+    },
+    "capability_deepthink": {
+      "message": "深度思考"
+    },
+    "capability_search": {
+      "message": "搜索"
+    },
+    "capability_thinking": {
+      "message": "思考"
+    },
+    "capability_internet_search": {
+      "message": "网络搜索"
+    },
+    "prompt_question_raw": {
+      "message": "{text} 是什么？能解释一下吗？"
+    },
+    "prompt_explain_raw": {
+      "message": "请详细解释 {text} 的原理和用途。"
+    },
+    "prompt_summarize_raw": {
+      "message": "请简要总结：\n{text}"
+    },
+    "prompt_research_raw": {
+      "message": "请对 {text} 进行详细分析，包括：\n1. 关键概念\n2. 历史背景\n3. 当前发展\n4. 未来影响"
+    },
+    "shortcut_help_windows": {
+      "message": "使用 Alt/Ctrl/Shift + 键组合"
+    },
+    "shortcut_help_mac": {
+      "message": "使用 Option/Command/Shift + 键组合"
+    }
+  }

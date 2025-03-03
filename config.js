@@ -1,23 +1,23 @@
 // 共享的询问模式模板
 export const FEATURE_TEMPLATES = {
-  ask: {
-    name: 'Question Mode',
-    prompt: 'What is ${text}? Can you explain it?',
+  question: {
+    name: chrome.i18n.getMessage('mode_question'),
+    prompt: chrome.i18n.getMessage('prompt_question_raw'),
     order: 0
   },
   explain: {
-    name: 'Explain Mode',
-    prompt: 'Please explain in detail the principles and uses of ${text}.',
+    name: chrome.i18n.getMessage('mode_explain'),
+    prompt: chrome.i18n.getMessage('prompt_explain_raw'),
     order: 1
   },
   summarize: {
-    name: 'Summarize',
-    prompt: 'Please provide a concise summary of:\n${text}',
+    name: chrome.i18n.getMessage('mode_summarize'),
+    prompt: chrome.i18n.getMessage('prompt_summarize_raw'),
     order: 2
   },
   research: {
-    name: 'Research Mode',
-    prompt: 'Please provide a detailed analysis of ${text}, including:\n1. Key concepts\n2. Historical context\n3. Current developments\n4. Future implications',
+    name: chrome.i18n.getMessage('mode_research'),
+    prompt: chrome.i18n.getMessage('prompt_research_raw'),
     order: 3
   }
 };
@@ -28,7 +28,7 @@ export const DEFAULT_ASSISTANTS = {
       url: 'https://chatgpt.com/',
       enabled: true,
       order: 0,
-      currentFeature: 'ask',
+      currentFeature: 'question',
       features: FEATURE_TEMPLATES,
       tabBehavior: 'new',
       selectors: {
@@ -53,7 +53,7 @@ export const DEFAULT_ASSISTANTS = {
       url: 'https://chat.deepseek.com/',
       enabled: true,
       order: 1,
-      currentFeature: 'ask',
+      currentFeature: 'question',
       features: FEATURE_TEMPLATES,
       tabBehavior: 'new',
       selectors: {
@@ -83,7 +83,7 @@ export const DEFAULT_ASSISTANTS = {
       url: 'https://gemini.google.com/app',
       enabled: true,
       order: 2,
-      currentFeature: 'ask',
+      currentFeature: 'question',
       features: FEATURE_TEMPLATES,
       tabBehavior: 'new',
       selectors: {
@@ -101,7 +101,7 @@ export const DEFAULT_ASSISTANTS = {
       url: 'https://www.perplexity.ai/',
       enabled: true,
       order: 3,
-      currentFeature: 'ask',
+      currentFeature: 'question',
       features: FEATURE_TEMPLATES,
       tabBehavior: 'new',
       selectors: {
@@ -119,7 +119,7 @@ export const DEFAULT_ASSISTANTS = {
       url: 'https://grok.com/',
       enabled: true,
       order: 4,
-      currentFeature: 'ask',
+      currentFeature: 'question',
       features: FEATURE_TEMPLATES,
       tabBehavior: 'new',
       selectors: {
@@ -137,7 +137,7 @@ export const DEFAULT_ASSISTANTS = {
       url: 'https://copilot.microsoft.com/',
       enabled: true,
       order: 5,
-      currentFeature: 'ask',
+      currentFeature: 'question',
       features: FEATURE_TEMPLATES,
       tabBehavior: 'new',
       selectors: {
@@ -155,7 +155,7 @@ export const DEFAULT_ASSISTANTS = {
       url: 'https://tongyi.aliyun.com/qianwen/',
       enabled: true,
       order: 6,
-      currentFeature: 'ask',
+      currentFeature: 'question',
       features: FEATURE_TEMPLATES,
       tabBehavior: 'new',
       selectors: {
@@ -173,7 +173,7 @@ export const DEFAULT_ASSISTANTS = {
       url: 'https://kimi.moonshot.cn/',
       enabled: true,
       order: 7,
-      currentFeature: 'ask',
+      currentFeature: 'question',
       features: FEATURE_TEMPLATES,
       tabBehavior: 'new',
       selectors: {
@@ -199,11 +199,11 @@ export const DEFAULT_ASSISTANTS = {
         description: ""
       }
     },
-    yiyan: {
+    ernie: {
       url: 'https://yiyan.baidu.com/',
       enabled: true,
       order: 8,
-      currentFeature: 'ask',
+      currentFeature: 'question',
       features: FEATURE_TEMPLATES,
       tabBehavior: 'new',
       selectors: {
@@ -228,17 +228,4 @@ export const SHORTCUT_CONSTANTS = {
     'windows': 'Use Alt/Ctrl/Shift + key combinations',
     'mac': 'Use Option/Command/Shift + key combinations'
   }
-};
-
-// 格式化助手名称的映射
-export const DISPLAY_NAMES = {
-  chatgpt: 'ChatGPT',
-  deepseek: 'DeepSeek AI',
-  gemini: 'Google Gemini',
-  perplexity: 'Perplexity',
-  grok: 'Grok',
-  copilot: 'Microsoft Copilot',
-  qianwen: 'Qianwen',
-  kimi: 'Kimi',
-  yiyan: 'Wenxin Yiyan'
 }; 
