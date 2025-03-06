@@ -43,8 +43,14 @@ Quick Ask AI is a Chrome extension that allows you to quickly ask AI assistants 
 
 ## Installation
 
+### Chrome
 1. Visit [Chrome Web Store](your_store_link)
 2. Click "Add to Chrome"
+3. The extension icon will appear in your toolbar
+
+### Firefox
+1. Visit [Firefox Add-ons](your_firefox_addon_link)
+2. Click "Add to Firefox"
 3. The extension icon will appear in your toolbar
 
 ## Quick Start

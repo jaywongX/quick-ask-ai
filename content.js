@@ -165,7 +165,13 @@ class AIHandler {
     
     switch (this.config.inputMethod) {
       case 'innerHTML':
-        textArea.innerHTML = `<p>${text}</p>`;
+        // 创建文本节点
+        while (textArea.firstChild) {
+          textArea.removeChild(textArea.firstChild);
+        }
+        const p = document.createElement('p');
+        p.textContent = text;
+        textArea.appendChild(p);
         textArea.dispatchEvent(new InputEvent('input', {
           bubbles: true,
           cancelable: true,
@@ -176,10 +182,11 @@ class AIHandler {
         
       case 'execCommand':
         textArea.focus();
-        textArea.innerHTML = '';
         document.execCommand('insertText', false, text);
         if (!textArea.textContent) {
-          textArea.innerHTML = `<p>${text}</p>`;
+          const p = document.createElement('p');
+          p.textContent = text;
+          textArea.appendChild(p);
         }
         ['input', 'change', 'keyup', 'keydown'].forEach(eventType => {
           textArea.dispatchEvent(new Event(eventType, { bubbles: true }));
@@ -380,7 +387,8 @@ async function openAssistantWithShortcut(assistantId, selectedText) {
 
 // 初始化消息监听
 function initMessageListener() {
-  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
+  browserAPI.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'detectSelector') {
       detectSelector(request.type).then(selector => {
         sendResponse({ selector });
@@ -459,7 +467,8 @@ async function init() {
 init();
 
 // 监听来自 background 的消息
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
+browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'executeQuery') {
     let cleanup;
     try {

@@ -1,4 +1,4 @@
-import { DEFAULT_ASSISTANTS, FEATURE_TEMPLATES, SHORTCUT_CONSTANTS } from './config.js';
+import { DEFAULT_ASSISTANTS, FEATURE_TEMPLATES, SHORTCUT_CONSTANTS, browserAPI } from './config.js';
 import { i18n } from './i18n.js';
 
 // 初始化页面
@@ -12,15 +12,15 @@ async function initializeUI() {
   const data = await loadAssistantsData();
   renderAIList(data.assistants);
   initializeDragAndDrop();
-  
+
   // 初始化页面国际化
   i18n.initializeI18n();
 }
 
 // 加载AI助手数据
 async function loadAssistantsData() {
-  const result = await chrome.storage.sync.get('aiAssistants');
-  
+  const result = await browserAPI.storage.sync.get('aiAssistants');
+
   // 返回数据，如果不存在则返回默认值
   return result.aiAssistants || DEFAULT_ASSISTANTS;
 }
@@ -30,11 +30,11 @@ async function saveAssistantsData(data) {
   try {
     // 检查数据大小
     const jsonSize = new Blob([JSON.stringify(data)]).size;
-    if (jsonSize > chrome.storage.sync.QUOTA_BYTES) {
+    if (jsonSize > browserAPI.storage.sync.QUOTA_BYTES) {
       throw new Error('Storage quota exceeded');
     }
-    
-    await chrome.storage.sync.set({ aiAssistants: data });
+
+    await browserAPI.storage.sync.set({ aiAssistants: data });
   } catch (error) {
     if (error.message === 'Storage quota exceeded') {
       showToast(i18n.getMessage('storageQuotaExceeded'), 'error');
@@ -46,7 +46,9 @@ async function saveAssistantsData(data) {
 // 渲染AI列表
 function renderAIList(assistants) {
   const aiList = document.getElementById('aiList');
-  aiList.innerHTML = '';
+  while (aiList.firstChild) {
+    aiList.removeChild(aiList.firstChild);
+  }
 
   // 按order排序
   const sortedAssistants = Object.entries(assistants)
@@ -75,13 +77,27 @@ function createAIListItem(assistant, id) {
 
   const actionsDiv = document.createElement('div');
   actionsDiv.className = 'ai-actions';
-  actionsDiv.innerHTML = `
-    <button class="toggle-btn ${assistant.enabled ? 'enabled' : 'disabled'}" data-action="toggle">
-      ${assistant.enabled ? i18n.getMessage('status_enabled') : i18n.getMessage('status_disabled')}
-    </button>
-    <button class="action-btn" data-action="edit" title="${i18n.getMessage('button_edit')}">⚙️</button>
-    <button class="action-btn" data-action="delete" title="${i18n.getMessage('button_delete')}">🗑️</button>
-  `;
+
+  const toggleButton = document.createElement('button');
+  toggleButton.className = `toggle-btn ${assistant.enabled ? 'enabled' : 'disabled'}`;
+  toggleButton.setAttribute('data-action', 'toggle');
+  toggleButton.textContent = assistant.enabled ? i18n.getMessage('status_enabled') : i18n.getMessage('status_disabled');
+
+  const editButton = document.createElement('button');
+  editButton.className = 'action-btn';
+  editButton.setAttribute('data-action', 'edit');
+  editButton.title = i18n.getMessage('button_edit');
+  editButton.textContent = '⚙️';
+
+  const deleteButton = document.createElement('button');
+  deleteButton.className = 'action-btn';
+  deleteButton.setAttribute('data-action', 'delete');
+  deleteButton.title = i18n.getMessage('button_delete');
+  deleteButton.textContent = '🗑️';
+
+  actionsDiv.appendChild(toggleButton);
+  actionsDiv.appendChild(editButton);
+  actionsDiv.appendChild(deleteButton);
 
   item.appendChild(dragDiv);
   item.appendChild(nameDiv);
@@ -110,19 +126,19 @@ let currentKey = '';
 // 对话框管理
 const DialogManager = {
   activeDialogs: new Set(),
-  
+
   showDialog(dialogId) {
     // 打开新对话框
     const dialog = document.getElementById(dialogId);
     dialog.classList.remove('hidden');
     this.activeDialogs.add(dialogId);
   },
-  
+
   hideDialog(dialogId) {
     document.getElementById(dialogId).classList.add('hidden');
     this.activeDialogs.delete(dialogId);
   },
-  
+
   // 隐藏所有对话框
   hideAllDialogs() {
     this.activeDialogs.forEach(dialogId => {
@@ -152,14 +168,14 @@ function hideDeleteFeatureDialog() {
 function initShortcutSetting() {
   const editShortcut = document.getElementById('editShortcut');
   const clearShortcut = document.getElementById('clearShortcut');
-  
+
   editShortcut.addEventListener('focus', () => {
     isRecording = true;
     editShortcut.value = 'Press keys...';
     currentModifiers = [];
     currentKey = '';
   });
-  
+
   editShortcut.addEventListener('blur', async () => {
     isRecording = false;
     if (!currentKey) {
@@ -168,21 +184,21 @@ function initShortcutSetting() {
       editShortcut.value = assistant?.shortcut?.description || '';
     }
   });
-  
+
   document.addEventListener('keydown', (e) => {
     if (!isRecording) return;
     e.preventDefault();
-    
+
     const key = e.key;
     if (SHORTCUT_CONSTANTS.FORBIDDEN_KEYS.includes(key)) return;
-    
+
     // 处理修饰键
     const modifierMap = {
       'Alt': 'Alt',
       'Control': 'Control',
       'Shift': 'Shift'
     };
-    
+
     if (key in modifierMap) {
       const modifier = modifierMap[key];
       if (!currentModifiers.includes(modifier)) {
@@ -192,20 +208,20 @@ function initShortcutSetting() {
       // 对于字母键，统一存储为大写
       currentKey = key.length === 1 ? key.toUpperCase() : key;
     }
-    
+
     if (currentModifiers.length > SHORTCUT_CONSTANTS.MAX_MODIFIERS) {
       currentModifiers = currentModifiers.slice(-SHORTCUT_CONSTANTS.MAX_MODIFIERS);
     }
-    
+
     const description = [...currentModifiers, currentKey].join(' + ');
     editShortcut.value = description;
-    
+
     if (currentKey) {
       isRecording = false;
       editShortcut.blur();
     }
   });
-  
+
   clearShortcut.addEventListener('click', () => {
     currentModifiers = [];
     currentKey = '';
@@ -227,20 +243,20 @@ function setupEventListeners() {
   document.getElementById('resetConfirm').addEventListener('click', async () => {
     try {
       // 重置设置
-      await chrome.storage.sync.set({
+      await browserAPI.storage.sync.set({
         aiAssistants: DEFAULT_ASSISTANTS
       });
-      
+
       // 重新加载数据并更新UI
       const data = await loadAssistantsData();
       renderAIList(data.assistants);
-      
+
       // 通知 background 更新右键菜单
       await updateContextMenus();
-      
+
       // 关闭对话框
       DialogManager.hideAllDialogs();
-      
+
       // 显示成功提示
       showToast(i18n.getMessage('settingsResetSuccess'));
     } catch (error) {
@@ -287,7 +303,7 @@ function setupEventListeners() {
   function canDeleteAssistant(assistants, id) {
     const enabledAssistants = Object.values(assistants)
       .filter(a => a.enabled && a.id !== id);
-    
+
     if (enabledAssistants.length === 0) {
       showToast(i18n.getMessage('cannotDeleteLastAssistant'), 'error');
       return false;
@@ -299,21 +315,21 @@ function setupEventListeners() {
   async function handleDelete() {
     try {
       const data = await loadAssistantsData();
-      
+
       if (!canDeleteAssistant(data.assistants, deleteAssistantId)) {
         return;
       }
 
       delete data.assistants[deleteAssistantId];
       await saveAssistantsData(data);
-      
+
       // 更新UI
       renderAIList(data.assistants);
       await updateContextMenus();
-      
+
       // 关闭对话框
       hideDeleteDialog();
-      
+
       showToast(i18n.getMessage('assistantDeletedSuccess'));
     } catch (error) {
       console.error('[Quick Ask AI] Error deleting assistant:', error);
@@ -338,11 +354,11 @@ function setupEventListeners() {
         await updateContextMenus();
         renderAIList(data.assistants);
         break;
-        
+
       case 'edit':
         showEditDialog(id);
         break;
-        
+
       case 'delete':
         showDeleteDialog(id, data.assistants[id].name);
         break;
@@ -372,33 +388,33 @@ function setupEventListeners() {
     btn.addEventListener('click', async (e) => {
       const type = e.target.dataset.detect;
       const assistant = await getAssistantConfig(currentEditId);
-      
+
       try {
         e.target.classList.add('detecting');
         e.target.textContent = '🔄 Detecting...';
-        
+
         // 在新标签页中打开AI助手页面
-        const tab = await chrome.tabs.create({ url: assistant.url, active: true });
-        
+        const tab = await browserAPI.tabs.create({ url: assistant.url, active: true });
+
         // 等待页面加载完成
         await new Promise(resolve => {
-          chrome.tabs.onUpdated.addListener(function listener(tabId, info) {
+          browserAPI.tabs.onUpdated.addListener(function listener(tabId, info) {
             if (tabId === tab.id && info.status === 'complete') {
-              chrome.tabs.onUpdated.removeListener(listener);
+              browserAPI.tabs.onUpdated.removeListener(listener);
               resolve();
             }
           });
         });
-        
+
         // 再等待一小段时间确保 content script 已加载
         await new Promise(resolve => setTimeout(resolve, 5000));
-        
+
         // 发送消息给content script开始检测
-        const response = await chrome.tabs.sendMessage(tab.id, {
+        const response = await browserAPI.tabs.sendMessage(tab.id, {
           action: 'detectSelector',
           type: type
         });
-        
+
         if (response.selector) {
           document.getElementById(`edit${type.charAt(0).toUpperCase() + type.slice(1)}Selector`).value = response.selector;
           showToast(i18n.getMessage('selectorDetectedSuccess'));
@@ -427,12 +443,12 @@ function setupEventListeners() {
 
     e.preventDefault();
     e.stopPropagation();
-  
+
     const featureItem = e.target.closest('.feature-item');
     const featureId = featureItem.dataset.id;
     const data = await loadAssistantsData();
     const assistant = data.assistants[currentEditId];
-  
+
     switch (action) {
       case 'editFeature':
         DialogManager.hideDialog('editDialog');
@@ -467,10 +483,10 @@ function setupEventListeners() {
   document.getElementById('deleteFeatureConfirm').addEventListener('click', async () => {
     const data = await loadAssistantsData();
     const assistant = data.assistants[currentEditId];
-    
+
     // 从对象中删除该模式
     delete assistant.features[deleteFeatureId];
-    
+
     await saveAssistantsData(data);
     await renderFeaturesList();
     hideDeleteFeatureDialog();
@@ -485,10 +501,10 @@ function setupEventListeners() {
   document.getElementById('editCapabilitiesList').addEventListener('click', e => {
     const toggle = e.target.closest('.capability-toggle');
     if (!toggle) return;
-    
+
     e.preventDefault();  // 防止表单提交
     e.stopPropagation(); // 防止事件冒泡
-    
+
     toggle.classList.toggle('active');
   });
 }
@@ -496,30 +512,30 @@ function setupEventListeners() {
 // 初始化拖拽排序
 function initializeDragAndDrop() {
   const aiList = document.getElementById('aiList');
-  
+
   let draggedItem = null;
-  
+
   aiList.addEventListener('dragstart', e => {
     draggedItem = e.target;
     e.target.classList.add('dragging');
   });
-  
+
   aiList.addEventListener('dragend', async e => {
     e.target.classList.remove('dragging');
-    
+
     // 获取新的排序
     const items = [...aiList.children];
     const data = await loadAssistantsData();
-    
+
     // 更新每个助手的顺序
     items.forEach((item, index) => {
       const id = item.dataset.id;
       data.assistants[id].order = index;
     });
-    
+
     // 保存新顺序
     await saveAssistantsData(data);
-    
+
     // 更新右键菜单
     await updateContextMenus();
   });
@@ -529,7 +545,7 @@ function initializeDragAndDrop() {
     e.preventDefault();
     const draggable = aiList.querySelector('.dragging');
     if (!draggable) return;
-  
+
     const afterElement = getAIListDragAfterElement(aiList, e.clientY);
     if (afterElement) {
       aiList.insertBefore(draggable, afterElement);
@@ -546,7 +562,7 @@ function getAIListDragAfterElement(container, y) {
   return draggableElements.reduce((closest, child) => {
     const box = child.getBoundingClientRect();
     const offset = y - box.top - box.height / 2;
-    
+
     if (offset < 0 && offset > closest.offset) {
       return { offset: offset, element: child };
     } else {
@@ -559,7 +575,7 @@ function getAIListDragAfterElement(container, y) {
 async function updateContextMenus() {
   try {
     // 通知 background 更新右键菜单
-    await chrome.runtime.sendMessage({ action: 'createContextMenus' });
+    await browserAPI.runtime.sendMessage({ action: 'createContextMenus' });
   } catch (error) {
     console.warn('Failed to update context menus:', error);
   }
@@ -585,22 +601,21 @@ async function showEditDialog(id) {
   currentEditId = id;
   const data = await loadAssistantsData();
   const assistant = data.assistants[id];
-  
+
   document.getElementById('editName').value = i18n.getMessage(id);
   document.getElementById('editUrl').value = assistant.url;
   document.getElementById('editShortcut').value = assistant.shortcut?.description || '';
   document.getElementById('editTabBehavior').value = assistant.tabBehavior || 'new';
   currentKey = assistant.shortcut?.key || '';
   currentModifiers = assistant.shortcut?.modifiers || [];
-  
+
   // 根据是否有 capabilities 来显示或隐藏相关部分
   const capabilitiesSection = document.getElementById('capabilitiesSection');
   if (assistant.capabilities && Object.keys(assistant.capabilities).length > 0) {
     capabilitiesSection.style.display = 'block';
     // 渲染功能设置列表
     const capabilitiesList = document.getElementById('editCapabilitiesList');
-    capabilitiesList.innerHTML = '';
-    
+
     Object.entries(assistant.capabilities).forEach(([capId, capability]) => {
       const button = document.createElement('button');
       button.className = `capability-toggle ${capability.enabled ? 'active' : ''}`;
@@ -611,10 +626,10 @@ async function showEditDialog(id) {
   } else {
     capabilitiesSection.style.display = 'none';
   }
-  
+
   // 渲染询问模式列表
   await renderFeaturesList();
-  
+
   DialogManager.showDialog('editDialog');
 }
 
@@ -658,29 +673,29 @@ function validateForm() {
 // 处理编辑表单提交
 async function handleEditFormSubmit(e) {
   e.preventDefault();
-  
+
   // 显示保存中状态
   const saveButton = document.getElementById('editSave');
   const originalText = saveButton.textContent;
   saveButton.textContent = 'Saving...';
   saveButton.disabled = true;
-  
+
   try {
     let data = {
       assistants: (await loadAssistantsData()).assistants
     };
-    
+
     const assistant = data.assistants[currentEditId];
     if (!assistant) {
       throw new Error(`Assistant not found: ${currentEditId}`);
     }
-    
+
     // 检查 URL 可访问性
     const url = document.getElementById('editUrl').value.trim();
-    
+
     assistant.url = url;
     assistant.tabBehavior = document.getElementById('editTabBehavior').value;
-    
+
     // 更新快捷键设置
     if (currentKey) {
       const newShortcut = {
@@ -689,32 +704,32 @@ async function handleEditFormSubmit(e) {
         modifiers: currentModifiers,
         description: document.getElementById('editShortcut').value
       };
-      
+
       const { hasConflict, conflictWith } = await checkShortcutConflict(newShortcut, currentEditId);
       if (hasConflict) {
         showToast(i18n.getMessage('shortcutConflictsWith', conflictWith), 'error');
         return;
       }
-      
+
       assistant.shortcut = newShortcut;
     } else {
       assistant.shortcut = null;
     }
-    
+
     // 更新功能设置
     if (assistant.capabilities) {
       const capabilityToggles = document.querySelectorAll('#editCapabilitiesList .capability-toggle');
-      
+
       capabilityToggles.forEach(toggle => {
         const capId = toggle.dataset.capability;
         assistant.capabilities[capId].enabled = toggle.classList.contains('active');
       });
     }
-    
+
     await saveAssistantsData(data);
     await updateContextMenus();
     renderAIList(data.assistants);
-    
+
     DialogManager.hideDialog('editDialog');
     showToast(i18n.getMessage('settingsSavedSuccess'));
   } catch (error) {
@@ -728,7 +743,7 @@ async function handleEditFormSubmit(e) {
 
 // 打开新标签页
 function openNewTab(url) {
-  chrome.tabs.create({ url });
+  browserAPI.tabs.create({ url });
 }
 
 // 显示提示信息
@@ -737,15 +752,15 @@ function showToast(message, type = 'success') {
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
   toast.textContent = message;
-  
+
   // 添加到页面
   document.body.appendChild(toast);
-  
+
   // 动画显示
   requestAnimationFrame(() => {
     toast.classList.add('show');
   });
-  
+
   // 3秒后移除
   setTimeout(() => {
     toast.classList.remove('show');
@@ -758,7 +773,7 @@ function showToast(message, type = 'success') {
 // 添加实时验证
 function setupFormValidation() {
   const inputs = ['editName', 'editUrl', 'editTextAreaSelector', 'editSubmitSelector'];
-  
+
   inputs.forEach(id => {
     const input = document.getElementById(id);
     input.addEventListener('input', () => {
@@ -808,7 +823,7 @@ function validateInput(input) {
 // 移除输入错误
 function removeInputError(input) {
   input.classList.remove('error');
-  
+
   // 移除错误消息
   const errorDiv = input.nextElementSibling;
   if (errorDiv && errorDiv.classList.contains('error-message')) {
@@ -819,7 +834,7 @@ function removeInputError(input) {
 // 显示输入错误
 function showInputError(input, message) {
   input.classList.add('error');
-  
+
   // 创建或更新错误消息
   let errorDiv = input.nextElementSibling;
   if (!errorDiv || !errorDiv.classList.contains('error-message')) {
@@ -837,11 +852,11 @@ let currentFeatureId = null;
 async function showFeatureDialog(id = null, feature = null) {
   currentFeatureId = id;
   const form = document.getElementById('featureForm');
-  
+
   const data = await loadAssistantsData();
   const assistant = data.assistants[currentEditId];
   const features = assistant.features;
-  
+
   if (feature) {
     // 编辑模式
     const template = features[id];
@@ -851,7 +866,7 @@ async function showFeatureDialog(id = null, feature = null) {
     // 新增模式
     form.reset();
   }
-  
+
   DialogManager.showDialog('featureDialog');
 }
 
@@ -897,7 +912,7 @@ async function handleFeatureFormSubmit() {
     const form = document.getElementById('featureForm');
     const name = form.querySelector('#featureName').value.trim();
     const prompt = form.querySelector('#featurePrompt').value.trim();
-  
+
     // 验证
     if (!name || !prompt) {
       showToast(i18n.getMessage('allFieldsRequired'), 'error');
@@ -907,23 +922,23 @@ async function handleFeatureFormSubmit() {
       showToast(i18n.getMessage('promptMustIncludeText'), 'error');
       return;
     }
-  
+
     const data = await loadAssistantsData();
     const assistant = data.assistants[currentEditId];
-  
+
     // 如果是新增模式，生成唯一的 ID
     let id = currentFeatureId;
     if (!id) {
       id = 'mode_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
     }
-  
+
     // 更新或添加询问模式
     assistant.features[id] = {
       name,
       prompt,
       order: Object.keys(assistant.features).length
     };
-  
+
     await saveAssistantsData(data);
     await renderFeaturesList();
     hideFeatureDialog();
@@ -937,7 +952,9 @@ async function handleFeatureFormSubmit() {
 // 渲染询问模式列表
 async function renderFeaturesList() {
   const featuresList = document.getElementById('featuresList');
-  featuresList.innerHTML = '';
+  while (featuresList.firstChild) {
+    featuresList.removeChild(featuresList.firstChild);
+  }
 
   const data = await loadAssistantsData();
   const assistant = data.assistants[currentEditId];
@@ -959,14 +976,15 @@ async function renderFeaturesList() {
 
     const radioContainer = document.createElement('div');
     radioContainer.className = 'feature-radio';
-    radioContainer.innerHTML = `
-      <input type="radio" 
-        name="currentFeature" 
-        value="${id}" 
-        ${currentEditId && assistant.currentFeature === id ? 'checked' : ''}>
-    `;
-
-    // 添加单选框 change 事件监听
+    const radioInput = document.createElement('input');
+    radioInput.type = 'radio';
+    radioInput.name = 'currentFeature';
+    radioInput.value = id;
+    if (currentEditId && assistant.currentFeature === id) {
+      radioInput.checked = true;
+    }
+    radioContainer.appendChild(radioInput);
+    
     const radio = radioContainer.querySelector('input[type="radio"]');
     radio.addEventListener('change', async (e) => {
       if (e.target.checked) {
@@ -993,10 +1011,22 @@ async function renderFeaturesList() {
 
     const actionsDiv = document.createElement('div');
     actionsDiv.className = 'feature-actions';
-    actionsDiv.innerHTML = `
-      <button class="action-btn" data-action="editFeature" title="Edit">⚙️</button>
-      <button class="action-btn" data-action="deleteFeature" title="Delete">🗑️</button>
-    `;
+    
+    const editButton = document.createElement('button');
+    editButton.className = 'action-btn';
+    editButton.setAttribute('data-action', 'editFeature');
+    editButton.title = 'Edit';
+    editButton.textContent = '⚙️'; 
+    
+    const deleteButton = document.createElement('button');
+    deleteButton.className = 'action-btn';
+    deleteButton.setAttribute('data-action', 'deleteFeature');
+    deleteButton.title = 'Delete';
+    deleteButton.textContent = '🗑️';
+    
+    // 将所有按钮添加到actionsDiv中
+    actionsDiv.appendChild(editButton);
+    actionsDiv.appendChild(deleteButton);
 
     featureItem.appendChild(dragHandle);
     featureItem.appendChild(radioContainer);
@@ -1013,19 +1043,19 @@ async function renderFeaturesList() {
 function initializeFeaturesDragAndDrop() {
   const featuresList = document.getElementById('featuresList');
   let lastY = 0;  // 记录上次的Y坐标
-  
+
   featuresList.addEventListener('dragstart', e => {
     if (e.target.classList.contains('feature-item')) {
       e.target.classList.add('dragging');
       lastY = e.clientY;  // 记录开始拖动时的位置
     }
   });
-  
+
   featuresList.addEventListener('dragover', e => {
     e.preventDefault();
     const draggable = featuresList.querySelector('.dragging');
     if (!draggable) return;
-    
+
     // 计算移动距离
     const moveDistance = Math.abs(e.clientY - lastY);
     // 只有移动距离超过阈值才更新位置
@@ -1039,16 +1069,16 @@ function initializeFeaturesDragAndDrop() {
       lastY = e.clientY;  // 更新最后位置
     }
   });
-  
+
   featuresList.addEventListener('dragend', async e => {
     if (e.target.classList.contains('feature-item')) {
       e.target.classList.remove('dragging');
-      
+
       // 更新顺序
       const items = [...featuresList.querySelectorAll('.feature-item')];
       const data = await loadAssistantsData();
       const assistant = data.assistants[currentEditId];
-      
+
       // 更新每个特性的顺序
       items.forEach((item, index) => {
         const featureId = item.dataset.id;
@@ -1056,7 +1086,7 @@ function initializeFeaturesDragAndDrop() {
           assistant.features[featureId].order = index;
         }
       });
-      
+
       await saveAssistantsData(data);
     }
   });
@@ -1065,19 +1095,19 @@ function initializeFeaturesDragAndDrop() {
 // 获取拖拽后的位置
 function getFeaturesListDragAfterElement(container, y) {
   const draggableElements = [...container.querySelectorAll('.feature-item:not(.dragging)')];
-  
+
   // 添加最小移动阈值（像素）
   const THRESHOLD = 10;
-  
+
   return draggableElements.reduce((closest, child) => {
     const box = child.getBoundingClientRect();
     const offset = y - box.top - box.height / 2;
-    
+
     // 只有当移动距离超过阈值时才触发排序
     if (Math.abs(offset) < THRESHOLD) {
       return closest;
     }
-    
+
     if (offset < 0 && offset > closest.offset) {
       return { offset: offset, element: child };
     } else {
@@ -1088,12 +1118,11 @@ function getFeaturesListDragAfterElement(container, y) {
 
 // 渲染助手配置
 async function renderAssistant(assistant) {
-  // ... 现有代码 ...
-  
-  // 渲染功能设置
   const capabilitiesList = assistantElem.querySelector('.capabilities-list');
-  capabilitiesList.innerHTML = '';
-  
+  while (capabilitiesList.firstChild) {
+    capabilitiesList.removeChild(capabilitiesList.firstChild);
+  }
+
   if (assistant.capabilities) {
     Object.entries(assistant.capabilities).forEach(([capId, capability]) => {
       const button = document.createElement('button');
@@ -1112,35 +1141,35 @@ function initEditDialog() {
   const editUrl = document.getElementById('editUrl');
   const editShortcut = document.getElementById('editShortcut');
   const clearShortcut = document.getElementById('clearShortcut');
-  
+
   let currentAssistant = null;
-  
+
   // 快捷键录入处理
   let isRecording = false;
   let currentModifiers = [];
   let currentKey = '';
-  
+
   editShortcut.addEventListener('focus', () => {
     isRecording = true;
     editShortcut.value = 'Press keys...';
     currentModifiers = [];
     currentKey = '';
   });
-  
+
   editShortcut.addEventListener('blur', () => {
     isRecording = false;
     if (!currentKey) {
       editShortcut.value = currentAssistant?.shortcut?.description || '';
     }
   });
-  
+
   document.addEventListener('keydown', (e) => {
     if (!isRecording) return;
     e.preventDefault();
-    
+
     const key = e.key;
     if (SHORTCUT_CONSTANTS.FORBIDDEN_KEYS.includes(key)) return;
-    
+
     if (SHORTCUT_CONSTANTS.MODIFIER_KEYS.includes(key)) {
       if (!currentModifiers.includes(key)) {
         currentModifiers.push(key);
@@ -1148,26 +1177,26 @@ function initEditDialog() {
     } else {
       currentKey = key;
     }
-    
+
     if (currentModifiers.length > SHORTCUT_CONSTANTS.MAX_MODIFIERS) {
       currentModifiers = currentModifiers.slice(-SHORTCUT_CONSTANTS.MAX_MODIFIERS);
     }
-    
+
     const description = [...currentModifiers, currentKey].join(' + ');
     editShortcut.value = description;
-    
+
     if (currentKey) {
       isRecording = false;
       editShortcut.blur();
     }
   });
-  
+
   clearShortcut.addEventListener('click', () => {
     currentModifiers = [];
     currentKey = '';
     editShortcut.value = '';
   });
-  
+
   // 打开编辑对话框
   function openEditDialog(assistant) {
     currentAssistant = assistant;
@@ -1176,11 +1205,11 @@ function initEditDialog() {
     editShortcut.value = assistant.shortcut?.description || '';
     // ... 其他初始化代码
   }
-  
+
   // 在保存快捷键之前检查冲突
   editForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     if (currentKey) {
       const newShortcut = {
         enabled: true,
@@ -1188,7 +1217,7 @@ function initEditDialog() {
         modifiers: currentModifiers,
         description: editShortcut.value
       };
-      
+
       const { hasConflict, conflictWith } = await checkShortcutConflict(newShortcut, currentAssistant.id);
       if (hasConflict) {
         showToast(i18n.getMessage('shortcutConflictsWith', conflictWith), 'error');
@@ -1203,14 +1232,14 @@ function initEditDialog() {
 async function checkShortcutConflict(newShortcut, currentAssistantId) {
   const data = await loadAssistantsData();
   const assistants = data.assistants;
-  
+
   for (const [id, assistant] of Object.entries(assistants)) {
     if (id === currentAssistantId) continue;
     if (!assistant.shortcut?.enabled) continue;
-    
+
     const existing = assistant.shortcut;
-    if (existing.key === newShortcut.key && 
-        arraysEqual(existing.modifiers, newShortcut.modifiers)) {
+    if (existing.key === newShortcut.key &&
+      arraysEqual(existing.modifiers, newShortcut.modifiers)) {
       return {
         hasConflict: true,
         conflictWith: i18n.getMessage(id)
@@ -1221,6 +1250,6 @@ async function checkShortcutConflict(newShortcut, currentAssistantId) {
 }
 
 function arraysEqual(a, b) {
-  return a.length === b.length && 
-         a.every((val, index) => val === b[index]);
+  return a.length === b.length &&
+    a.every((val, index) => val === b[index]);
 }

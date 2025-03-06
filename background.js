@@ -1,4 +1,5 @@
 import { DEFAULT_ASSISTANTS } from './config.js';
+import { browserAPI } from './config.js';
 
 chrome.runtime.onInstalled.addListener(async function initializeExtension({ reason }) {
   if (reason === 'install') {
@@ -143,7 +144,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 });
 
 // 监听来自popup的消息
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'createContextMenus') {
     createContextMenus();
   } else if (message.action === 'openAssistant') {

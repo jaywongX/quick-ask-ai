@@ -228,4 +228,7 @@ export const SHORTCUT_CONSTANTS = {
     'windows': 'Use Alt/Ctrl/Shift + key combinations',
     'mac': 'Use Option/Command/Shift + key combinations'
   }
-}; 
+};
+
+// Browser API compatibility layer
+export const browserAPI = typeof browser !== 'undefined' ? browser : chrome; 
