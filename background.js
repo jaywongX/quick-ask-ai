@@ -31,7 +31,7 @@ async function createContextMenus() {
     }
     
     chrome.contextMenus.create({
-      id: "quickSearchAI",
+      id: "quickAskAI",
       title: extensionName,
       contexts: ["selection"]
     });
@@ -51,14 +51,14 @@ async function createContextMenus() {
             throw new Error(`Failed to get translation for ${id}`);
           }
           
-          const menuTitle = chrome.i18n.getMessage('menu_search_with', [aiName]);
+          const menuTitle = chrome.i18n.getMessage('menu_ask_with', [aiName]);
           if (!menuTitle) {
             throw new Error(`Failed to get menu title translation for ${id}`);
           }
           
           chrome.contextMenus.create({
-            id: `searchWith${id.charAt(0).toUpperCase()}${id.slice(1)}`,
-            parentId: "quickSearchAI",
+            id: `askWith${id.charAt(0).toUpperCase()}${id.slice(1)}`,
+            parentId: "quickAskAI",
             title: menuTitle,
             contexts: ["selection"]
           });
@@ -93,7 +93,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   const data = await loadAssistantsData();
   const selectedText = info.selectionText;
   
-  const menuId = info.menuItemId.replace('searchWith', '').toLowerCase();
+  const menuId = info.menuItemId.replace('askWith', '').toLowerCase();
   const assistant = data.assistants[menuId];
   
   if (assistant && assistant.enabled) {
@@ -222,7 +222,7 @@ async function handleOpenAssistant(assistantId, selectedText) {
     }
     return { success: false, error: 'Assistant not found or disabled' };
   } catch (error) {
-    console.error('[Quick Search AI] Error:', error);
+    console.error('[Quick Ask AI] Error:', error);
     return { success: false, error: error.message };
   }
 }

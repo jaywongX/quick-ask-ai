@@ -15,9 +15,9 @@ export const FEATURE_TEMPLATES = {
     prompt: chrome.i18n.getMessage('prompt_summarize_raw'),
     order: 2
   },
-  research: {
-    name: chrome.i18n.getMessage('mode_research'),
-    prompt: chrome.i18n.getMessage('prompt_research_raw'),
+  reask: {
+    name: chrome.i18n.getMessage('mode_reask'),
+    prompt: chrome.i18n.getMessage('prompt_reask_raw'),
     order: 3
   }
 };
@@ -66,8 +66,8 @@ export const DEFAULT_ASSISTANTS = {
           enabled: false,
           selector: 'div[role="button"]'
         },
-        search: {
-          name: 'Search',
+        ask: {
+          name: 'Ask',
           enabled: false,
           selector: 'div[role="button"]'
         }
@@ -186,10 +186,10 @@ export const DEFAULT_ASSISTANTS = {
           enabled: false,
           selector: '.k15-switch'
         },
-        search: {
-          name: 'Internet Search',
+        ask: {
+          name: 'Internet Ask',
           enabled: false,
-          selector: '.search-switch'
+          selector: '.ask-switch'
         }
       },
       shortcut: {

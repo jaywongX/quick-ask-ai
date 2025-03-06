@@ -1,4 +1,4 @@
-# Quick Search AI
+# Quick Ask AI
 
 A browser extension that allows you to quickly send selected text to various AI assistants for queries.
 
@@ -32,7 +32,7 @@ A browser extension that allows you to quickly send selected text to various AI 
 ## Usage
 
 1. Select any text on a webpage
-2. Right-click and select "Quick Search AI" from the menu
+2. Right-click and select "Quick Ask AI" from the menu
 3. Choose your preferred AI assistant
 4. The extension will automatically open a new tab and send the selected text to the AI assistant
 
@@ -55,8 +55,8 @@ A browser extension that allows you to quickly send selected text to various AI 
 
 ### v1.0.2
 - chatgpt The reason mode can be set
-- deepseek Allows you to set the deepthink and search modes
-- kimi supports the thinking and search mode
+- deepseek Allows you to set the deepthink and ask modes
+- kimi supports the thinking and ask mode
 
 ### v1.0.1
 - Implement the plug-in UI

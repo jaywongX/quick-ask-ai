@@ -37,7 +37,7 @@ async function saveAssistantsData(data) {
     await chrome.storage.sync.set({ aiAssistants: data });
   } catch (error) {
     if (error.message === 'Storage quota exceeded') {
-      showToast('Storage quota exceeded. Try removing some custom features.', 'error');
+      showToast(i18n.getMessage('storageQuotaExceeded'), 'error');
     }
     throw error;
   }
@@ -92,8 +92,8 @@ function createAIListItem(assistant, id) {
 
 // 配置常量
 const CONFIG = {
-  GITHUB_ISSUES: 'https://github.com/jaywongX/quick-search-ai/issues',
-  GITHUB_REPO: 'https://github.com/jaywongX/quick-search-ai',
+  GITHUB_ISSUES: 'https://github.com/jaywongX/quick-ask-ai/issues',
+  GITHUB_REPO: 'https://github.com/jaywongX/quick-ask-ai',
   DONATE_URLS: {
     DOMESTIC: 'https://afdian.com/a/jaywong',    // 国内捐赠链接
     OVERSEAS: 'https://ko-fi.com/jaywong'        // 国外捐赠链接
@@ -242,10 +242,10 @@ function setupEventListeners() {
       DialogManager.hideAllDialogs();
       
       // 显示成功提示
-      showToast('Settings have been reset to default.');
+      showToast(i18n.getMessage('settingsResetSuccess'));
     } catch (error) {
       console.error('Failed to reset settings:', error);
-      showToast('Failed to reset settings', 'error');
+      showToast(i18n.getMessage('settingsResetError'), 'error');
     }
   });
 
@@ -289,7 +289,7 @@ function setupEventListeners() {
       .filter(a => a.enabled && a.id !== id);
     
     if (enabledAssistants.length === 0) {
-      showToast('Cannot delete the last enabled AI Assistant', 'error');
+      showToast(i18n.getMessage('cannotDeleteLastAssistant'), 'error');
       return false;
     }
     return true;
@@ -314,10 +314,10 @@ function setupEventListeners() {
       // 关闭对话框
       hideDeleteDialog();
       
-      showToast('AI Assistant deleted successfully');
+      showToast(i18n.getMessage('assistantDeletedSuccess'));
     } catch (error) {
-      console.error('[Quick Search AI] Error deleting assistant:', error);
-      showToast('Failed to delete AI Assistant', 'error');
+      console.error('[Quick Ask AI] Error deleting assistant:', error);
+      showToast(i18n.getMessage('assistantDeletedError'), 'error');
     }
   }
 
@@ -401,13 +401,13 @@ function setupEventListeners() {
         
         if (response.selector) {
           document.getElementById(`edit${type.charAt(0).toUpperCase() + type.slice(1)}Selector`).value = response.selector;
-          showToast('Selector detected successfully');
+          showToast(i18n.getMessage('selectorDetectedSuccess'));
         } else {
-          showToast('Failed to detect selector', 'error');
+          showToast(i18n.getMessage('selectorDetectedError'), 'error');
         }
       } catch (error) {
-        console.error('[Quick Search AI] Error detecting selector:', error);
-        showToast('Failed to detect selector', 'error');
+        console.error('[Quick Ask AI] Error detecting selector:', error);
+        showToast(i18n.getMessage('selectorDetectedError'), 'error');
       } finally {
         e.target.classList.remove('detecting');
         e.target.textContent = '🔍 Detect';
@@ -440,11 +440,11 @@ function setupEventListeners() {
         break;
       case 'deleteFeature':
         if (Object.keys(assistant.features).length <= 1) {
-          showToast('Cannot delete the last ask mode', 'error');
+          showToast(i18n.getMessage('cannotDeleteLastAskMode'), 'error');
           return;
         }
         if (assistant.currentFeature === featureId) {
-          showToast('Cannot delete the current ask mode', 'error');
+          showToast(i18n.getMessage('cannotDeleteCurrentAskMode'), 'error');
           return;
         }
         showDeleteFeatureDialog(featureId, assistant.features[featureId].name);
@@ -474,7 +474,7 @@ function setupEventListeners() {
     await saveAssistantsData(data);
     await renderFeaturesList();
     hideDeleteFeatureDialog();
-    showToast('Ask mode deleted successfully');
+    showToast(i18n.getMessage('askModeDeletedSuccess'));
   });
 
   document.getElementById('deleteFeatureCancel').addEventListener('click', () => {
@@ -640,7 +640,7 @@ function validateForm() {
 
   // 检查必填项
   if (!name || !url || !textAreaSelector || !submitSelector) {
-    showToast('All fields are required', 'error');
+    showToast(i18n.getMessage('allFieldsRequired'), 'error');
     return false;
   }
 
@@ -648,7 +648,7 @@ function validateForm() {
   try {
     new URL(url);
   } catch (e) {
-    showToast('Please enter a valid URL', 'error');
+    showToast(i18n.getMessage('pleaseEnterValidURL'), 'error');
     return false;
   }
 
@@ -692,7 +692,7 @@ async function handleEditFormSubmit(e) {
       
       const { hasConflict, conflictWith } = await checkShortcutConflict(newShortcut, currentEditId);
       if (hasConflict) {
-        showToast(`Shortcut conflicts with ${conflictWith}`, 'error');
+        showToast(i18n.getMessage('shortcutConflictsWith', conflictWith), 'error');
         return;
       }
       
@@ -716,7 +716,7 @@ async function handleEditFormSubmit(e) {
     renderAIList(data.assistants);
     
     DialogManager.hideDialog('editDialog');
-    showToast('Settings saved successfully', 'success');
+    showToast(i18n.getMessage('settingsSavedSuccess'));
   } catch (error) {
     showToast(error.message, 'error');
   } finally {
@@ -874,8 +874,8 @@ async function restoreEditDialog() {
   const assistant = data.assistants[currentEditId];
 
   if (!assistant) {
-    console.error('[Quick Search AI] Assistant not found:', currentEditId);
-    showToast('Error restoring assistant data', 'error');
+    console.error('[Quick Ask AI] Assistant not found:', currentEditId);
+    showToast(i18n.getMessage('errorRestoringAssistantData'), 'error');
     return;
   }
 
@@ -900,11 +900,11 @@ async function handleFeatureFormSubmit() {
   
     // 验证
     if (!name || !prompt) {
-      showToast('All fields are required', 'error');
+      showToast(i18n.getMessage('allFieldsRequired'), 'error');
       return;
     }
     if (!prompt.includes('${text}')) {
-      showToast('Prompt must include ${text}', 'error');
+      showToast(i18n.getMessage('promptMustIncludeText'), 'error');
       return;
     }
   
@@ -927,10 +927,10 @@ async function handleFeatureFormSubmit() {
     await saveAssistantsData(data);
     await renderFeaturesList();
     hideFeatureDialog();
-    showToast(currentFeatureId ? 'Ask mode updated successfully' : 'Ask mode added successfully');
+    showToast(i18n.getMessage('askModeUpdatedSuccess'));
   } catch (error) {
-    console.error('[Quick Search AI] Error saving ask mode:', error);
-    showToast('Failed to save ask mode', 'error');
+    console.error('[Quick Ask AI] Error saving ask mode:', error);
+    showToast(i18n.getMessage('askModeSaveError'), 'error');
   }
 }
 
@@ -1159,7 +1159,7 @@ function initEditDialog() {
       
       const { hasConflict, conflictWith } = await checkShortcutConflict(newShortcut, currentAssistant.id);
       if (hasConflict) {
-        showToast(`Shortcut conflicts with ${conflictWith}`, 'error');
+        showToast(i18n.getMessage('shortcutConflictsWith', conflictWith), 'error');
         return;
       }
     }

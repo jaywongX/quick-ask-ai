@@ -1,12 +1,12 @@
 {
     "extension_name": {
-      "message": "Quick Search AI"
+      "message": "Quick Ask AI"
     },
     "extension_description": {
-      "message": "Select text and search with AI assistants"
+      "message": "Select text and ask with AI assistants"
     },
     "popup_title": {
-      "message": "Quick Search AI"
+      "message": "Quick Ask AI"
     },
     "button_reset": {
       "message": "Reset all settings"
@@ -164,8 +164,8 @@
     "kimi": {
       "message": "Kimi"
     },
-    "menu_search_with": {
-      "message": "Search with $1",
+    "menu_ask_with": {
+      "message": "Quick Ask $1",
       "description": "Context menu item text. $1 will be replaced with AI assistant name"
     },
     "mode_question": {
@@ -177,8 +177,8 @@
     "mode_summarize": {
       "message": "Summarize"
     },
-    "mode_research": {
-      "message": "Research Mode"
+    "mode_reask": {
+      "message": "Reask Mode"
     },
     "capability_reason": {
       "message": "Reason"
@@ -186,14 +186,14 @@
     "capability_deepthink": {
       "message": "DeepThink"
     },
-    "capability_search": {
-      "message": "Search"
+    "capability_ask": {
+      "message": "Ask"
     },
     "capability_thinking": {
       "message": "Thinking"
     },
-    "capability_internet_search": {
-      "message": "Internet Search"
+    "capability_internet_ask": {
+      "message": "Internet Ask"
     },
     "prompt_question": {
       "message": "What is $${text}? Can you explain it?"
@@ -204,7 +204,7 @@
     "prompt_summarize": {
       "message": "Please provide a concise summary of:\n$${text}"
     },
-    "prompt_research": {
+    "prompt_reask": {
       "message": "Please provide a detailed analysis of $${text}, including:\n1. Key concepts\n2. Historical context\n3. Current developments\n4. Future implications"
     },
     "shortcut_help_windows": {
@@ -212,5 +212,62 @@
     },
     "shortcut_help_mac": {
       "message": "Use Option/Command/Shift + key combinations"
+    },
+    "storageQuotaExceeded": {
+      "message": "Storage quota exceeded. Try removing some custom features."
+    },
+    "settingsResetSuccess": {
+      "message": "Settings have been reset to default"
+    },
+    "settingsResetError": {
+      "message": "Failed to reset settings"
+    },
+    "cannotDeleteLastAssistant": {
+      "message": "Cannot delete the last enabled AI Assistant"
+    },
+    "assistantDeletedSuccess": {
+      "message": "AI Assistant deleted successfully"
+    },
+    "assistantDeletedError": {
+      "message": "Failed to delete AI Assistant"
+    },
+    "selectorDetectedSuccess": {
+      "message": "Selector detected successfully"
+    },
+    "selectorDetectedError": {
+      "message": "Failed to detect selector"
+    },
+    "cannotDeleteLastAskMode": {
+      "message": "Cannot delete the last ask mode"
+    },
+    "cannotDeleteCurrentAskMode": {
+      "message": "Cannot delete the current ask mode"
+    },
+    "askModeDeletedSuccess": {
+      "message": "Ask mode deleted successfully"
+    },
+    "allFieldsRequired": {
+      "message": "All fields are required"
+    },
+    "pleaseEnterValidURL": {
+      "message": "Please enter a valid URL"
+    },
+    "shortcutConflictsWith": {
+      "message": "Shortcut conflicts with $1"
+    },
+    "settingsSavedSuccess": {
+      "message": "Settings saved successfully"
+    },
+    "errorRestoringAssistantData": {
+      "message": "Error restoring assistant data"
+    },
+    "promptMustIncludeText": {
+      "message": "Prompt must include ${text}"
+    },
+    "askModeUpdatedSuccess": {
+      "message": "Ask mode updated successfully"
+    },
+    "askModeSaveError": {
+      "message": "Failed to save ask mode"
     }
   }

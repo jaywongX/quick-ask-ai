@@ -65,7 +65,7 @@ class AIHandler {
   async getSelectors() {
     const assistant = await getAssistantConfig(this.aiId);
     if (!assistant?.selectors) {
-      console.error(`[Quick Search AI] Selectors not found for ${this.aiId}`);
+      console.error(`[Quick Ask AI] Selectors not found for ${this.aiId}`);
       throw new Error('Selectors not found');
     }
     return assistant.selectors;
@@ -73,12 +73,12 @@ class AIHandler {
   
   // 等待元素出现
   async waitForElement(selector, options = {}) {
-    console.log(`[Quick Search AI] ${this.aiId} waiting for element: ${selector}`);
+    console.log(`[Quick Ask AI] ${this.aiId} waiting for element: ${selector}`);
     return new Promise((resolve, reject) => {
       let observer;
       const timeout = setTimeout(() => {
         observer?.disconnect();
-        console.log(`[Quick Search AI] ${this.aiId} timeout waiting for: ${selector}`);
+        console.log(`[Quick Ask AI] ${this.aiId} timeout waiting for: ${selector}`);
         resolve(null);
       }, 10000);
 
@@ -191,7 +191,7 @@ class AIHandler {
         textArea.dispatchEvent(new Event('change', { bubbles: true }));
     }
     
-    console.log(`[Quick Search AI] ${this.aiId} text input successful`);
+    console.log(`[Quick Ask AI] ${this.aiId} text input successful`);
     return textArea;
   }
 
@@ -232,9 +232,9 @@ class AIHandler {
           submitButton.click();
       }
 
-      console.log(`[Quick Search AI] ${this.aiId} submit successful`);
+      console.log(`[Quick Ask AI] ${this.aiId} submit successful`);
     } catch (error) {
-      console.error(`[Quick Search AI] Error during ${this.aiId} submit:`, error);
+      console.error(`[Quick Ask AI] Error during ${this.aiId} submit:`, error);
       throw error;
     }
   }
@@ -243,7 +243,7 @@ class AIHandler {
   async handleCapabilities() {
     const assistant = await getAssistantConfig(this.aiId);
     if (!assistant?.capabilities) {
-      console.log(`[Quick Search AI] No capabilities for ${this.aiId}`);
+      console.log(`[Quick Ask AI] No capabilities for ${this.aiId}`);
       return;
     }
     const promises = [];
@@ -259,7 +259,7 @@ class AIHandler {
           
           if (isActive !== capability.enabled) {
             element.click();
-            console.log(`[Quick Search AI] ${this.aiId} clicked button: `, element);
+            console.log(`[Quick Ask AI] ${this.aiId} clicked button: `, element);
           }
           resolve();
         }, 10000, this.aiId);
@@ -370,7 +370,7 @@ async function openAssistantWithShortcut(assistantId, selectedText) {
     });
   } catch (error) {
     if (error.message !== 'The message port closed before a response was received.') {
-      console.error('[Quick Search AI] Error:', error);
+      console.error('[Quick Ask AI] Error:', error);
     }
   }
 }
@@ -425,7 +425,7 @@ async function handlePendingQuery(handler, capabilitiesPromise) {
 
 // 主初始化函数
 async function init() {
-  console.log('[Quick Search AI] Initializing');
+  console.log('[Quick Ask AI] Initializing');
 
   try {
     // 初始化各个模块
@@ -444,7 +444,7 @@ async function init() {
     await handlePendingQuery(handler, capabilitiesPromise);
 
   } catch (error) {
-    console.error('[Quick Search AI] Error:', error);
+    console.error('[Quick Ask AI] Error:', error);
   }
 }
 
@@ -476,10 +476,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     } catch (error) {
       // 检查是否是扩展上下文失效错误
       if (error.message.includes('Extension context invalidated')) {
-        console.log('[Quick Search AI] Extension reloaded, stopping execution');
+        console.log('[Quick Ask AI] Extension reloaded, stopping execution');
         return;
       }
-      console.error('[Quick Search AI] Error:', error);
+      console.error('[Quick Ask AI] Error:', error);
     }
   }
 });
@@ -539,7 +539,7 @@ async function detectSelector(type) {
       });
     });
   } catch (error) {
-    console.error('[Quick Search AI] Error detecting selector:', error);
+    console.error('[Quick Ask AI] Error detecting selector:', error);
     return null;
   }
 }
@@ -841,7 +841,7 @@ function waitForElement(selector, buttonText, callback, timeout = 10000, aiId) {
     }
   
     if (Date.now() - startTime >= timeout) {
-      console.warn(`[Quick Search AI] Button not found: ${buttonText}`);
+      console.warn(`[Quick Ask AI] Button not found: ${buttonText}`);
       observer?.disconnect();
       return;
     }

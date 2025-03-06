@@ -1,12 +1,12 @@
 {
     "extension_name": {
-      "message": "Quick Search AI"
+      "message": "Quick Ask AI"
     },
     "extension_description": {
-      "message": "选择文本，使用 AI 助手快速搜索"
+      "message": "选择文本并快速询问AI助手"
     },
     "popup_title": {
-      "message": "Quick Search AI"
+      "message": "Quick Ask AI"
     },
     "button_reset": {
       "message": "重置所有设置"
@@ -164,8 +164,8 @@
     "kimi": {
       "message": "Kimi"
     },
-    "menu_search_with": {
-      "message": "使用 $1 搜索",
+    "menu_ask_with": {
+      "message": "快速询问 $1 ",
       "description": "右键菜单项文本。$1 将被替换为 AI 助手名称"
     },
     "mode_question": {
@@ -177,7 +177,7 @@
     "mode_summarize": {
       "message": "总结模式"
     },
-    "mode_research": {
+    "mode_reask": {
       "message": "研究模式"
     },
     "capability_reason": {
@@ -186,13 +186,13 @@
     "capability_deepthink": {
       "message": "深度思考"
     },
-    "capability_search": {
+    "capability_ask": {
       "message": "搜索"
     },
     "capability_thinking": {
       "message": "思考"
     },
-    "capability_internet_search": {
+    "capability_internet_ask": {
       "message": "网络搜索"
     },
     "prompt_question_raw": {
@@ -204,7 +204,7 @@
     "prompt_summarize_raw": {
       "message": "请简要总结：\n$${text}$$"
     },
-    "prompt_research_raw": {
+    "prompt_reask_raw": {
       "message": "请对 $${text} 进行详细分析，包括：\n1. 关键概念\n2. 历史背景\n3. 当前发展\n4. 未来影响"
     },
     "shortcut_help_windows": {
@@ -212,5 +212,62 @@
     },
     "shortcut_help_mac": {
       "message": "使用 Option/Command/Shift + 键组合"
+    },
+    "storageQuotaExceeded": {
+      "message": "存储配额已超出。请尝试删除一些自定义功能。"
+    },
+    "settingsResetSuccess": {
+      "message": "设置已重置为默认值"
+    },
+    "settingsResetError": {
+      "message": "重置设置失败"
+    },
+    "cannotDeleteLastAssistant": {
+      "message": "无法删除最后一个启用的 AI 助手"
+    },
+    "assistantDeletedSuccess": {
+      "message": "AI 助手删除成功"
+    },
+    "assistantDeletedError": {
+      "message": "删除 AI 助手失败"
+    },
+    "selectorDetectedSuccess": {
+      "message": "选择器检测成功"
+    },
+    "selectorDetectedError": {
+      "message": "选择器检测失败"
+    },
+    "cannotDeleteLastAskMode": {
+      "message": "无法删除最后一个询问模式"
+    },
+    "cannotDeleteCurrentAskMode": {
+      "message": "无法删除当前使用的询问模式"
+    },
+    "askModeDeletedSuccess": {
+      "message": "询问模式删除成功"
+    },
+    "allFieldsRequired": {
+      "message": "所有字段都是必填的"
+    },
+    "pleaseEnterValidURL": {
+      "message": "请输入有效的 URL"
+    },
+    "shortcutConflictsWith": {
+      "message": "快捷键与 $1 冲突"
+    },
+    "settingsSavedSuccess": {
+      "message": "设置保存成功"
+    },
+    "errorRestoringAssistantData": {
+      "message": "恢复助手数据时出错"
+    },
+    "promptMustIncludeText": {
+      "message": "提示词必须包含 ${text}"
+    },
+    "askModeUpdatedSuccess": {
+      "message": "询问模式更新成功"
+    },
+    "askModeSaveError": {
+      "message": "保存询问模式失败"
     }
   }
