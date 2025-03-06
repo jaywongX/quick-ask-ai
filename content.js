@@ -80,7 +80,7 @@ class AIHandler {
         observer?.disconnect();
         console.log(`[Quick Ask AI] ${this.aiId} timeout waiting for: ${selector}`);
         resolve(null);
-      }, 2000);
+      }, 5000);
 
       const findElement = () => {
         const element = document.querySelector(selector);
@@ -157,7 +157,7 @@ class AIHandler {
     
     const selectors = await this.getSelectors();
     console.log('[Quick Ask AI] text input selectors', selectors);
-    const textArea = await this.waitForElement(selectors.textArea, { timeout: 2000 });
+    const textArea = await this.waitForElement(selectors.textArea, { timeout: 5000 });
     
     if (!textArea) {
       throw new Error('Text area not found');
@@ -265,7 +265,7 @@ class AIHandler {
             console.log(`[Quick Ask AI] ${this.aiId} clicked button: `, element);
           }
           resolve();
-        }, 1000, this.aiId);
+        }, 5000, this.aiId);
       });
       
       promises.push(promise);
@@ -830,7 +830,7 @@ async function handleSelectedText(text) {
 }
 
 // 等待功能按钮出现的辅助函数
-function waitForElement(selector, buttonText, callback, timeout = 1000, aiId) {
+function waitForElement(selector, buttonText, callback, timeout = 5000, aiId) {
   const startTime = Date.now();
   let observer;
   let found = false;

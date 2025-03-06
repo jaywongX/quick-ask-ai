@@ -2,22 +2,22 @@
 export const FEATURE_TEMPLATES = {
   question: {
     name: chrome.i18n.getMessage('mode_question'),
-    prompt: chrome.i18n.getMessage('prompt_question_raw'),
+    prompt: chrome.i18n.getMessage('prompt_question'),
     order: 0
   },
   explain: {
     name: chrome.i18n.getMessage('mode_explain'),
-    prompt: chrome.i18n.getMessage('prompt_explain_raw'),
+    prompt: chrome.i18n.getMessage('prompt_explain'),
     order: 1
   },
   summarize: {
     name: chrome.i18n.getMessage('mode_summarize'),
-    prompt: chrome.i18n.getMessage('prompt_summarize_raw'),
+    prompt: chrome.i18n.getMessage('prompt_summarize'),
     order: 2
   },
   reask: {
     name: chrome.i18n.getMessage('mode_reask'),
-    prompt: chrome.i18n.getMessage('prompt_reask_raw'),
+    prompt: chrome.i18n.getMessage('prompt_reask'),
     order: 3
   }
 };

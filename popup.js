@@ -391,7 +391,7 @@ function setupEventListeners() {
         });
         
         // 再等待一小段时间确保 content script 已加载
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 5000));
         
         // 发送消息给content script开始检测
         const response = await chrome.tabs.sendMessage(tab.id, {

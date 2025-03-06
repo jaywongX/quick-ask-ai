@@ -1,88 +1,122 @@
 # Quick Ask AI
 
-A browser extension that allows you to quickly send selected text to various AI assistants for queries.
+<p align="center">
+  <img src="icons/icon128.png" alt="Quick Ask AI Logo">
+</p>
+
+[中文文档](README.zh-CN.md)
+
+Quick Ask AI is a Chrome extension that allows you to quickly ask AI assistants about any text you select on the web. Simply select text, right-click, and send it to your favorite AI assistant with customized prompts.
 
 ## Features
 
-- Supports multiple mainstream AI assistants:
+- 🤖 Multiple AI Assistants Support
   - ChatGPT
-  - DeepSeek AI
-  - Qianwen
   - Google Gemini
+  - DeepSeek
+  - Microsoft Copilot
   - Perplexity
   - Grok
-  - Microsoft Copilot
-  - Baidu ERNIE Bot
+  - Qianwen
+  - ERNIE Bot
   - Kimi
 
-- Easy to use:
-  1. Select any text
-  2. Right-click
-  3. Choose your preferred AI assistant
-  4. Automatically opens the AI assistant and sends the query
+- 🎯 Multiple Ask Modes
+  - Question Mode: Ask what something is
+  - Explain Mode: Get detailed explanations
+  - Summarize Mode: Get concise summaries
+  - Research Mode: Get comprehensive analysis
+
+- ⚙️ Rich Customization
+  - Edit/Delete AI assistants
+  - Customize prompts for each mode
+  - Drag-and-drop to reorder
+  - Configure keyboard shortcuts
+  - Tab behavior settings (new/reuse)
+
+- 🌐 User-Friendly
+  - English and Chinese interface
+  - Simple right-click operation
+  - Automatic text input
+  - Visual feedback
+  - Error handling
 
 ## Installation
 
-1. Download the source code
-2. Open Chrome browser, go to extensions page (chrome://extensions/)
-3. Enable "Developer mode"
-4. Click "Load unpacked"
-5. Select the source code folder
+1. Visit [Chrome Web Store](your_store_link)
+2. Click "Add to Chrome"
+3. The extension icon will appear in your toolbar
 
-## Usage
+## Quick Start
 
 1. Select any text on a webpage
-2. Right-click and select "Quick Ask AI" from the menu
-3. Choose your preferred AI assistant
-4. The extension will automatically open a new tab and send the selected text to the AI assistant
+2. Right-click the selected text
+3. Choose an AI assistant from the "Quick Ask" menu
+4. The text will be sent to the AI assistant automatically
 
-## Notes
+## Advanced Usage
 
-- Some AI assistants require login
-- Ensure you have access to the respective AI assistants
-- The extension handles text input and sending automatically
+### Managing AI Assistants
 
-## Version History
+1. Click the extension icon
+2. You can:
+   - Enable/disable assistants
+   - Add new assistants
+   - Edit existing assistants
+   - Reorder by dragging
+   - Delete unused assistants
 
-### v1.0.4
-* feat(i18n): improve internationalization implementation
+### Customizing Ask Modes
 
-### v1.0.3
-* feat(tab): add tab behavior setting for each AI assistant
-- Add option to reuse existing tab or create new tab
-- Add tab behavior selector in assistant edit dialog
-- Implement tab reuse logic in background script
+Each AI assistant can have multiple ask modes:
+- Edit prompt templates
+- Add custom modes
+- Reorder modes
+- Delete unused modes
 
-### v1.0.2
-- chatgpt The reason mode can be set
-- deepseek Allows you to set the deepthink and ask modes
-- kimi supports the thinking and ask mode
+### Keyboard Shortcuts
 
-### v1.0.1
-- Implement the plug-in UI
-- Support AI assistant disable, edit, delete functions
-- Added query mode. You can add, delete and modify the query mode. The default query mode is provided
-- New feedback and donation mechanism
+Set up keyboard shortcuts for quick access:
+1. Click the extension icon
+2. Edit an AI assistant
+3. Set up shortcuts using modifier keys (Ctrl/Command/Alt/Shift)
 
-### v1.0.0
-- Initial release
-- Support for 9 mainstream AI assistants
-- Basic text selection and sending functionality
+## FAQ
 
-## Technical Implementation
+**Q: Why isn't the text automatically sent after opening the AI assistant website?**
+A: If you haven't logged into the AI assistant website, the extension won't work properly. Please log in first and try again, or refresh the page.
 
-- Uses Chrome Extension Manifest V3
-- Supports DOM operation adaptation for different AI assistants
-- Asynchronous handling of page loading and element finding
+**Q: How do I reset all settings?**
+A: Click the extension icon and use the "Reset all settings" button.
 
-## License
+**Q: Can I export/import settings?**
+A: Currently not supported. We're considering adding this feature.
 
-[Add license information]
+## Privacy
+
+- No data collection
+- No tracking
+- Settings stored locally
+- Text sent directly to chosen AI assistant
 
 ## Contributing
 
-Issues and Pull Requests are welcome to help improve this project.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## Author
+## License
 
-[Add author information] 
+MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Changelog
+
+### v1.0.4
+- Added support for more AI assistants
+- Improved drag-and-drop functionality
+- Enhanced error handling
+- Fixed selector detection issues
+- Added internationalization support
+
+### v1.0.3
+- Added new ask modes
+- Improved performance
+- Bug fixes 

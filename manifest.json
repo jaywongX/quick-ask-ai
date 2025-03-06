@@ -20,23 +20,21 @@
     }
   },
   "permissions": [
-    "activeTab",
     "storage",
     "scripting",
     "contextMenus",
-    "tabs",
-    "clipboardRead"
+    "tabs"
   ],
   "host_permissions": [
-    "https://chat.deepseek.com/*",
-    "https://tongyi.aliyun.com/*",
     "https://chatgpt.com/*",
-    "https://grok.com/*",
+    "https://chat.deepseek.com/*",
     "https://gemini.google.com/*",
     "https://www.perplexity.ai/*",
+    "https://grok.com/*",
     "https://copilot.microsoft.com/*",
-    "https://yiyan.baidu.com/*",
-    "https://kimi.moonshot.cn/*"
+    "https://tongyi.aliyun.com/*",
+    "https://kimi.moonshot.cn/*",
+    "https://yiyan.baidu.com/*"
   ],
   "background": {
     "service_worker": "background.js",
@@ -47,15 +45,12 @@
       "matches": [
         "*://*/*"
       ],
-      "js": ["content.js"],
-      "run_at": "document_start"
+      "js": ["content.js"]
     }
   ],
   "web_accessible_resources": [
     {
       "resources": [
-        "js/*.js",
-        "tests/*.js",
         "_locales/*/*.json"
       ],
       "matches": ["<all_urls>"]
