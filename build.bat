@@ -33,13 +33,13 @@ copy /y "i18n.js" "temp\"
 :: 创建 Chrome 版本
 echo Creating Chrome extension...
 cd temp
-tar -czf "..\dist\quick-ask-ai-chrome-%version%.zip" *
+powershell Compress-Archive -Path * -DestinationPath ..\dist\quick-ask-ai-chrome-%version%.zip -Force
 cd ..
 
 :: 创建 Firefox 版本（使用相同的文件）
 echo Creating Firefox extension...
 cd temp
-tar -czf "..\dist\quick-ask-ai-firefox-%version%.zip" *
+"C:\Program Files\7-Zip\7z.exe" a -tzip "..\dist\quick-ask-ai-firefox-%version%.zip" * -mx=9 -mmt=on
 cd ..
 
 :: 清理临时文件
