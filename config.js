@@ -66,8 +66,8 @@ export const DEFAULT_ASSISTANTS = {
           enabled: false,
           selector: 'div[role="button"]'
         },
-        ask: {
-          name: 'Ask',
+        search: {
+          name: 'Search',
           enabled: false,
           selector: 'div[role="button"]'
         }
@@ -186,8 +186,8 @@ export const DEFAULT_ASSISTANTS = {
           enabled: false,
           selector: '.k15-switch'
         },
-        ask: {
-          name: 'Internet Ask',
+        search: {
+          name: 'Internet Search',
           enabled: false,
           selector: '.ask-switch'
         }

@@ -530,7 +530,7 @@ function initializeDragAndDrop() {
     const draggable = aiList.querySelector('.dragging');
     if (!draggable) return;
   
-    const afterElement = getDragAfterElement(aiList, e.clientY);
+    const afterElement = getAIListDragAfterElement(aiList, e.clientY);
     if (afterElement) {
       aiList.insertBefore(draggable, afterElement);
     } else {
@@ -540,7 +540,7 @@ function initializeDragAndDrop() {
 }
 
 // 获取拖拽后的位置
-function getDragAfterElement(container, y) {
+function getAIListDragAfterElement(container, y) {
   const draggableElements = [...container.querySelectorAll('.ai-item:not(.dragging)')];
 
   return draggableElements.reduce((closest, child) => {
@@ -1012,10 +1012,31 @@ async function renderFeaturesList() {
 // 初始化询问模式的拖拽排序
 function initializeFeaturesDragAndDrop() {
   const featuresList = document.getElementById('featuresList');
+  let lastY = 0;  // 记录上次的Y坐标
   
   featuresList.addEventListener('dragstart', e => {
     if (e.target.classList.contains('feature-item')) {
       e.target.classList.add('dragging');
+      lastY = e.clientY;  // 记录开始拖动时的位置
+    }
+  });
+  
+  featuresList.addEventListener('dragover', e => {
+    e.preventDefault();
+    const draggable = featuresList.querySelector('.dragging');
+    if (!draggable) return;
+    
+    // 计算移动距离
+    const moveDistance = Math.abs(e.clientY - lastY);
+    // 只有移动距离超过阈值才更新位置
+    if (moveDistance > 10) {
+      const afterElement = getFeaturesListDragAfterElement(featuresList, e.clientY);
+      if (afterElement) {
+        featuresList.insertBefore(draggable, afterElement);
+      } else {
+        featuresList.appendChild(draggable);
+      }
+      lastY = e.clientY;  // 更新最后位置
     }
   });
   
@@ -1039,19 +1060,30 @@ function initializeFeaturesDragAndDrop() {
       await saveAssistantsData(data);
     }
   });
+}
+
+// 获取拖拽后的位置
+function getFeaturesListDragAfterElement(container, y) {
+  const draggableElements = [...container.querySelectorAll('.feature-item:not(.dragging)')];
   
-  featuresList.addEventListener('dragover', e => {
-    e.preventDefault();
-    const draggable = featuresList.querySelector('.dragging');
-    if (!draggable) return;
+  // 添加最小移动阈值（像素）
+  const THRESHOLD = 10;
   
-    const afterElement = getDragAfterElement(featuresList, e.clientY);
-    if (afterElement) {
-      featuresList.insertBefore(draggable, afterElement);
-    } else {
-      featuresList.appendChild(draggable);
+  return draggableElements.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    
+    // 只有当移动距离超过阈值时才触发排序
+    if (Math.abs(offset) < THRESHOLD) {
+      return closest;
     }
-  });
+    
+    if (offset < 0 && offset > closest.offset) {
+      return { offset: offset, element: child };
+    } else {
+      return closest;
+    }
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
 // 渲染助手配置

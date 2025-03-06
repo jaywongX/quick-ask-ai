@@ -80,7 +80,7 @@ class AIHandler {
         observer?.disconnect();
         console.log(`[Quick Ask AI] ${this.aiId} timeout waiting for: ${selector}`);
         resolve(null);
-      }, 10000);
+      }, 2000);
 
       const findElement = () => {
         const element = document.querySelector(selector);
@@ -156,7 +156,8 @@ class AIHandler {
     text = text.replace(/[<>]/g, '');
     
     const selectors = await this.getSelectors();
-    const textArea = await this.waitForElement(selectors.textArea, { timeout: 10000 });
+    console.log('[Quick Ask AI] text input selectors', selectors);
+    const textArea = await this.waitForElement(selectors.textArea, { timeout: 2000 });
     
     if (!textArea) {
       throw new Error('Text area not found');
@@ -199,6 +200,7 @@ class AIHandler {
   async handleSubmit(textArea) {
     try {
       const selectors = await this.getSelectors();
+      console.log('[Quick Ask AI] submit selectors', selectors);
       const submitButton = await this.waitForElement(selectors.submitButton, { checkEnabled: true });
 
       // 如果找不到提交按钮但配置了回车键提交
@@ -250,11 +252,12 @@ class AIHandler {
     
     Object.entries(assistant.capabilities).forEach(([capId, capability]) => {
       if (!capability.selector) return;
-      
+      console.log('[Quick Ask AI] capability.selector', capability.selector);
       const buttonText = capability.name;
       
       const promise = new Promise(resolve => {
         waitForElement(capability.selector, buttonText, (element) => {
+          console.log('[Quick Ask AI] found element', element);
           const isActive = this.checkButtonState(element, this.aiId);
           
           if (isActive !== capability.enabled) {
@@ -262,7 +265,7 @@ class AIHandler {
             console.log(`[Quick Ask AI] ${this.aiId} clicked button: `, element);
           }
           resolve();
-        }, 10000, this.aiId);
+        }, 1000, this.aiId);
       });
       
       promises.push(promise);
@@ -410,7 +413,11 @@ async function initCapabilities() {
 // 处理待处理的查询
 async function handlePendingQuery(handler, capabilitiesPromise) {
   const data = await chrome.storage.local.get(['selectedText', 'aiProvider']);
-  if (!data.selectedText || !data.aiProvider) return;
+  console.log('[Quick Ask AI] handlePendingQuery', data);
+  if (!data.selectedText || !data.aiProvider) {
+    console.log('[Quick Ask AI] No pending query');
+    return;
+  }
   
   await capabilitiesPromise;
   await chrome.storage.local.remove(['selectedText', 'aiProvider']);
@@ -823,7 +830,7 @@ async function handleSelectedText(text) {
 }
 
 // 等待功能按钮出现的辅助函数
-function waitForElement(selector, buttonText, callback, timeout = 10000, aiId) {
+function waitForElement(selector, buttonText, callback, timeout = 1000, aiId) {
   const startTime = Date.now();
   let observer;
   let found = false;
@@ -841,7 +848,7 @@ function waitForElement(selector, buttonText, callback, timeout = 10000, aiId) {
     }
   
     if (Date.now() - startTime >= timeout) {
-      console.warn(`[Quick Ask AI] Button not found: ${buttonText}`);
+      console.error(`[Quick Ask AI] Button not found: ${buttonText}`);
       observer?.disconnect();
       return;
     }
